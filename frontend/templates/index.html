@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Haysyn Wall</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding ;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f3f4f6;
+      color: #111;
+    }
+
+    body {
+      padding-bottom: 80px;
+    }
+
+    header {
+      padding: 1rem;
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-align: center;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    #feed {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .post {
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border: 1px solid #e5e7eb;
+      transition: background 0.2s;
+      word-break: break-word;
+    }
+
+    .post:hover {
+      background: #fafafa;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+      background: white;
+      border-top: 1px solid #ddd;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.03);
+      z-index: 100;
+    }
+
+    textarea {
+      flex: 1;
+      padding: 0.6rem 0.8rem;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      resize: none;
+      height: 2.5rem;
+      line-height: 1.2rem;
+    }
+
+    button {
+      padding: 0 1rem;
+      font-size: 1.2rem;
+      border-radius: 10px;
+      background: #111;
+      color: white;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    button:hover {
+      background: #333;
+    }
+  </style>
+</head>
+<body>
+	<header style="font-family: 'Dancing Script', cursive; font-size: 1.8rem; font-weight: 600;">
+		📢 Haysyn Anon
+	</header>
+
+  <main id="feed"></main>
+
+  <footer>
+    <textarea id="textInput" placeholder="Скажи щось..."></textarea>
+    <button onclick="submitPost()">💬</button>
+  </footer>
+
+  <script>
+    let start = 0;
+    let loading = false;
+    let postPixelHeight = 120; // середня висота одного поста
+
+    function estimatePostsForScreen(multiplier = 1) {
+      const screenHeight = window.innerHeight;
+      const header = document.querySelector('header').offsetHeight;
+      const footer = document.querySelector('footer').offsetHeight;
+      const available = screenHeight - header - footer;
+      return Math.ceil((available / postPixelHeight) * multiplier);
+    }
+
+    async function loadFeedChunk(multiplier = 1) {
+      if (loading) return;
+      loading = true;
+
+      const feed = document.getElementById('feed');
+      try {
+        const amount = estimatePostsForScreen(multiplier);
+        const res = await fetch(`/api_v1/post?start=${start}&amount=${amount}`);
+        const posts = await res.json();
+
+        posts.forEach(post => {
+          const div = document.createElement('div');
+          div.className = 'post';
+          div.innerHTML = `<a href="/post/${post.id}" style="text-decoration:none;color:inherit;">${post.text}</a>`;
+          feed.appendChild(div);
+        });
+
+        start += posts.length;
+      } catch (err) {
+        console.error('Error loading posts', err);
+      }
+      loading = false;
+    }
+
+    async function submitPost() {
+      const input = document.getElementById('textInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      try {
+        const res = await fetch('/api_v1/post', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+				if (res.ok) {
+					input.value = '';
+					document.getElementById('feed').innerHTML = '';
+					start = 0;
+					await loadFeedChunk(1.5); // трохи більше одного екрану
+					window.scrollTo({ top: 0, behavior: 'smooth' });
+				}
+      } catch (err) {
+        console.error('Post failed', err);
+      }
+    }
+
+    window.addEventListener('scroll', () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+        loadFeedChunk(1); // ще одна "екранна порція"
+      }
+    });
+
+    // initial load
+    loadFeedChunk(1.5); // трохи більше екрану, щоб не показував порожнечу
+  </script>
+</body>
+</html>
