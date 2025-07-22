@@ -1,19 +1,25 @@
 from fastapi import FastAPI
-from contextlib import contextmanager
+from fastapi.staticfiles import StaticFiles
+
+from contextlib import asynccontextmanager
+
 from views import router as views_router
 from api import router as api_router
 
 from db.utils import db_helper 
+from config import STATIC_FILES_PATH
 import uvicorn
 
-@contextmanager
-def lifespan():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
 	db_helper.db_init()
 	yield
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
+app.mount("/static", StaticFiles(directory=STATIC_FILES_PATH), name="static")
 app.include_router(views_router)
 app.include_router(api_router)
+
 
 
 if __name__ == "__main__":
