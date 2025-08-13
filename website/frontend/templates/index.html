@@ -1,0 +1,35 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Haysyn Anon</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/script.js" defer></script>
+</head>
+<body>
+  {% include "header.html" %}
+  <main id="feed"></main>
+  <footer>
+    <textarea placeholder="Скажи щось..." onclick="openModal()" readonly></textarea>
+  </footer>
+
+  <!-- Modal -->
+  <div id="overlay">
+    <div id="modal">
+      <button onclick="submitPost()">💬 Надіслати</button>
+      <input type="text" id="postTitle" placeholder="Заголовок поста (обов'язково)" />
+      <div id="titleError" class="error"></div>
+      <textarea id="postText" placeholder="Текст поста..." oninput="autoGrow(this)"></textarea>
+
+      
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+services:
+  website:
+      image: website-image 
+      command: sh -c "uvicorn backend.main:app --host 0.0.0.0"
+      build:
+        context: ./website
+        dockerfile: Dockerfile
+      ports:
+        - 8000:8000
+      volumes:
+        - ./website:/app
+      container_name: website 
+      env_file: ./website/.env
+
+  telegram-bot:
+      image: telegram-bot-image 
+      command: sh -c "python3 main.py"
+      build:
+        context: ./telegram-bot
+        dockerfile: Dockerfile
+      volumes:
+        - ./telegram-bot:/app
+      container_name: telegram-bot 
+      env_file: ./telegram-bot/.env
+
+

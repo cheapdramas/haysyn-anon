@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+	<title>Haysyn Anon</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/post.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  {% include "header.html" %}
+
+  <main id="feed">
+  </main>
+  <footer>
+    <textarea placeholder="Скажи щось..." onclick="openCommentModal()" readonly></textarea>
+  </footer>
+  
+  <div id="overlay">
+    <div id="modal">
+      <button onclick="submitComment()">💬 Надіслати</button>
+      <textarea id="commentText" placeholder="Текст коментаря..." oninput="autoGrow(this)"></textarea>
+    </div>
+  </div>
+</body>
+</html>
