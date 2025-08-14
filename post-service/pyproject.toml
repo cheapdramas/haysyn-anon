@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "post-service"
+version = "0.1.0"
+description = "FastAPI + Redis for keeping unapproved posts"
+authors = ["cheapdramas <bileckijrostislav46@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.116.1"
+redis = "^6.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

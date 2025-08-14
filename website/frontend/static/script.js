@@ -1,3 +1,5 @@
+// script.js
+
 let start = 0;
 let loading = false;
 let noMorePosts = false;
@@ -5,7 +7,7 @@ const postPixelHeight = 120;
 let lastLoadTime = 0;
 const loadCooldown = 7000; // 7 секунд
 const CACHE_KEY = 'cachedPosts';
-const CACHE_TTL_MS = 1000 * 60 * 5; // 5 хвилин
+const CACHE_TTL_MS = 1000 * 60 * 5; // 5 минут
 
 function estimatePostsForScreen(multiplier = 1) {
   const screenHeight = window.innerHeight;
@@ -15,27 +17,43 @@ function estimatePostsForScreen(multiplier = 1) {
   return Math.ceil((available / postPixelHeight) * multiplier);
 }
 
+// --- безопасный рендер постов ---
 function renderPosts(posts) {
   const feed = document.getElementById('feed');
+
   posts.forEach(post => {
     const div = document.createElement('div');
     div.className = 'post';
-    const previewText = post.text.length > 200 ? post.text.slice(0, 200) + '...' : post.text;
 
-    div.innerHTML = `
-  <a href="/post/${post.id}" class="post-link" data-id="${post.id}" data-title="${encodeURIComponent(post.title)}" data-text="${encodeURIComponent(post.text)}" style="text-decoration:none;color:inherit;">
-    <strong>${post.title}</strong><br>
-    <span class="preview-text">${previewText}</span>
-  </a>`;
+    const link = document.createElement('a');
+    link.href = `/post/${post.id}`;
+    link.className = 'post-link';
+    link.dataset.id = post.id;
+    link.dataset.title = encodeURIComponent(post.title);
+    link.dataset.text = encodeURIComponent(post.text);
+    link.style.textDecoration = 'none';
+    link.style.color = 'inherit';
+
+    const strong = document.createElement('strong');
+    strong.textContent = post.title; // безопасно
+    link.appendChild(strong);
+
+    link.appendChild(document.createElement('br'));
+
+    const span = document.createElement('span');
+    span.className = 'preview-text';
+    const previewText = post.text.length > 200 ? post.text.slice(0, 200) + '...' : post.text;
+    span.textContent = previewText; // безопасно
+    link.appendChild(span);
+
+    div.appendChild(link);
     feed.appendChild(div);
   });
 }
 
+// --- кеширование ---
 function saveToCache(posts) {
-  const cacheData = {
-    posts: posts,
-    timestamp: Date.now()
-  };
+  const cacheData = { posts, timestamp: Date.now() };
   localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
 }
 
@@ -53,6 +71,7 @@ function loadFromCache() {
   start = posts.length;
 }
 
+// --- загрузка постов ---
 async function loadFeedChunk(multiplier = 1) {
   if (loading) return;
   loading = true;
@@ -75,6 +94,7 @@ async function loadFeedChunk(multiplier = 1) {
   loading = false;
 }
 
+// --- отправка нового поста ---
 async function submitPost() {
   const title = document.getElementById('postTitle').value.trim();
   const text = document.getElementById('postText').value.trim();
@@ -94,8 +114,9 @@ async function submitPost() {
       document.getElementById('titleError').textContent = '';
       document.getElementById('titleError').style.display = 'none';
 
-      localStorage.removeItem(CACHE_KEY); // скидаємо кеш
+      localStorage.removeItem(CACHE_KEY);
       closeModal();
+
       document.getElementById('feed').innerHTML = '';
       start = 0;
       await loadFeedChunk(1.5);
@@ -106,6 +127,7 @@ async function submitPost() {
   }
 }
 
+// --- модалка ---
 function openModal() {
   document.getElementById('overlay').style.display = 'flex';
   document.getElementById('feed').classList.add('blurred');
@@ -114,9 +136,7 @@ function openModal() {
   document.getElementById('titleError').textContent = '';
   document.getElementById('titleError').style.display = 'none';
 
-  setTimeout(() => {
-    autoGrow(document.getElementById('postText'));
-  }, 0);
+  setTimeout(() => autoGrow(document.getElementById('postText')), 0);
 }
 
 function closeModal() {
@@ -126,6 +146,7 @@ function closeModal() {
   document.body.style.overflow = '';
 }
 
+// --- автозростання textarea ---
 function autoGrowDesktop(elem) {
   const modal = document.getElementById('modal');
   const error = document.getElementById('titleError');
@@ -168,6 +189,7 @@ function autoGrow(elem) {
   else autoGrowDesktop(elem);
 }
 
+// --- валидация заголовка ---
 document.getElementById('postTitle').addEventListener('input', function () {
   const maxLength = 40;
   const error = document.getElementById('titleError');
@@ -182,6 +204,7 @@ document.getElementById('postTitle').addEventListener('input', function () {
   }
 });
 
+// --- подгрузка при скролле ---
 window.addEventListener('scroll', () => {
   const now = Date.now();
   if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
@@ -196,10 +219,12 @@ window.addEventListener('scroll', () => {
   }
 });
 
+// --- клик по overlay ---
 document.getElementById('overlay').addEventListener('click', (e) => {
   if (e.target.id === 'overlay') closeModal();
 });
 
+// --- клик по посту ---
 document.addEventListener('click', (e) => {
   const link = e.target.closest('.post-link');
   if (link) {
@@ -211,6 +236,6 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// 🧠 Спочатку — з кешу
+// --- сначала загружаем с кеша ---
 loadFromCache();
 loadFeedChunk(1.5);
