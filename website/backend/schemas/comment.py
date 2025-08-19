@@ -1,12 +1,12 @@
 from pydantic import BaseModel, StringConstraints
 from typing import Annotated 
-from .post import PostConfig
+from .post import MAX_TEXT_LEN 
 
 class CommentBase(BaseModel):
     post_id: int
 
 class CommentCreate(CommentBase):
-    text: Annotated[str, StringConstraints(max_length=PostConfig.max_text_len)]
+    text: Annotated[str, StringConstraints(max_length=MAX_TEXT_LEN)]
 
 
 class CommentRead(CommentCreate):

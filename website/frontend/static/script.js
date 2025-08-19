@@ -101,7 +101,7 @@ async function submitPost() {
   if (!title || !text) return;
 
   try {
-    const res = await fetch('/api/api_v1/post', {
+    const res = await fetch('/api/api_v1/post_website', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, text })

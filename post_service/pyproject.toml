@@ -1,14 +1,20 @@
 [tool.poetry]
-name = "telegram-bot"
+name = "post-service"
 version = "0.1.0"
-description = "Telegram Bot for servicing clients, and control website"
+description = ""
 authors = ["cheapdramas <bileckijrostislav46@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-aiogram = "^3.21.0"
 dotenv = "^0.9.9"
+fastapi = "^0.116.1"
+redis = "^6.4.0"
+pyjwt = "^2.10.1"
+uvicorn = "^0.35.0"
+snowflake-id = "^1.0.2"
+websockets = "^15.0.1"
+aiohttp = "^3.12.15"
 
 
 [build-system]

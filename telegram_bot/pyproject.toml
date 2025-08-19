@@ -1,14 +1,16 @@
 [tool.poetry]
-name = "post-service"
+name = "telegram-bot"
 version = "0.1.0"
-description = "FastAPI + Redis for keeping unapproved posts"
+description = ""
 authors = ["cheapdramas <bileckijrostislav46@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-fastapi = "^0.116.1"
-redis = "^6.4.0"
+aiogram = "^3.22.0"
+dotenv = "^0.9.9"
+pyjwt = "^2.10.1"
+websockets = "^15.0.1"
 
 
 [build-system]

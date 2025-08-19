@@ -8,7 +8,7 @@ from sqlalchemy.engine import Engine
 
 from .models import Base
 
-from backend.config import DATABASE_URL
+from backend.core.config import DATABASE_URL
 
 
 #TURNS ON FOREIGN KEYS CONSTRAINTS SQLITE3

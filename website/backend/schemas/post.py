@@ -2,17 +2,15 @@ from pydantic import BaseModel, StringConstraints
 from typing import Annotated 
 from dataclasses import dataclass
 
-@dataclass
-class PostConfig:
-	max_title_len: int = 40
-	max_text_len: int = 2200 
+MAX_TITLE_LEN = 40
+MAX_TEXT_LEN = 2200 
 
 class PostBase(BaseModel):
-	title: Annotated[str, StringConstraints(max_length=PostConfig.max_title_len)]
-	text: Annotated[str, StringConstraints(max_length=PostConfig.max_text_len)]
+	title: Annotated[str, StringConstraints(max_length=MAX_TITLE_LEN)]
+	text: Annotated[str, StringConstraints(max_length=MAX_TEXT_LEN)]
 
 class PostCreate(PostBase):
-	pass
+    pass
 
 class PostRead(PostBase):
 	id: int
