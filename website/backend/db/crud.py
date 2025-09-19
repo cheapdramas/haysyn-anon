@@ -3,7 +3,8 @@ from .models import Post, Comment
 from backend.schemas.post import (
 	PostBase,
 	PostCreate,
-	PostRead)
+	PostRead
+)
 from backend.schemas.comment import (
 	CommentBase,
 	CommentCreate,

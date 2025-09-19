@@ -16,7 +16,13 @@ case "$1" in
         source $(poetry env info -p)/bin/activate
         python3 -m main
         ;;
+    appcli)
+        cd website
+        source $(poetry env info -p)/bin/activate
+				
+        python3 -m backend.appcli.main
+        ;;
     *)
-        echo "Usage: $0 {post|web|tg}"
+        echo "Usage: $0 {post|web|tg|appcli}"
         ;;
 esac
