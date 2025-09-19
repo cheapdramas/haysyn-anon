@@ -4,7 +4,7 @@
 
  
 
-> /haysyn-anon/run.sh appcli
+> ./haysyn-anon/run.sh appcli
 
 # commands:
 
