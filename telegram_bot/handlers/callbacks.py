@@ -1,14 +1,17 @@
 from asyncio import start_server
-from aiogram import Router
+from aiogram import Router, Bot 
 from aiogram.types import CallbackQuery
 from core.websocket_client import ws_tasks, manage_post
-from schemas.post import PostStatus as status
+from schemas.post import PostModStatus as status
+
+from db.mod_messages_crud import ModMessagesCrud 
+
 
 router = Router()
 
 
 @router.callback_query(lambda c: c.data and c.data.startswith("approve:"))
-async def approve_handler(callback: CallbackQuery):
+async def approve_handler(callback: CallbackQuery, bot: Bot):
     user_id = str(callback.from_user.id)
 
     if not ws_tasks.get(user_id, None):
@@ -23,12 +26,18 @@ async def approve_handler(callback: CallbackQuery):
 
     await manage_post(user_id, str(post_id), "approved")
 
+    messages_that_waits_for_mod = ModMessagesCrud.get(post_id)
 
-    await callback.message.delete()
+    for msg in messages_that_waits_for_mod:
+        await bot.delete_message(chat_id=msg.admin_id, message_id=msg.message_id)
+
+    
+
+    ModMessagesCrud.delete(post_id)
 
 
 @router.callback_query(lambda c: c.data and c.data.startswith("decline:"))
-async def decline_handler(callback: CallbackQuery):
+async def decline_handler(callback: CallbackQuery, bot: Bot):
     user_id = str(callback.from_user.id)
 
     if not ws_tasks.get(user_id, None):
@@ -44,4 +53,10 @@ async def decline_handler(callback: CallbackQuery):
 
     await manage_post(user_id, str(post_id), "declined")
 
-    await callback.message.delete()
+
+    messages_that_waits_for_mod = ModMessagesCrud.get(post_id)
+
+    for msg in messages_that_waits_for_mod:
+        await bot.delete_message(chat_id=msg.admin_id, message_id=msg.message_id)
+
+    ModMessagesCrud.delete(post_id)

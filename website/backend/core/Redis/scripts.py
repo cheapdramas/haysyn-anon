@@ -1,8 +1,8 @@
 from typing import Tuple
-from schemas.post import Post, PostSend
-from core.config import ADMINS
-from core.auth import id_generator
-from Redis.client import get_redis
+from backend.schemas.post import PostCreate, PostInRedis 
+from backend.core.config import ADMINS
+from backend.core.auth import id_generator
+from backend.core.Redis.client import get_redis
 
 import asyncio
 import redis.asyncio as redis
@@ -29,7 +29,7 @@ async def clear_admin_unseen_posts(admin_id: str) -> None:
     r = await get_redis()
     await r.delete(f"admin_unseen:{admin_id}")
 
-async def add_post(post_id, payload: Post, seen_by:list[str] | list) -> str:
+async def add_post(post_id, payload: PostCreate, seen_by:list[str] | list) -> str:
     payload = payload.model_dump()
     post_key = "post:" + post_id
     
@@ -46,6 +46,8 @@ async def add_post(post_id, payload: Post, seen_by:list[str] | list) -> str:
 
 
 async def remove_post(post_id: str) -> dict:
+    """Removes post, clears post from admin_unseen
+    and returns it's info"""
     r = await get_redis()
 
     post_key = "post:" + post_id

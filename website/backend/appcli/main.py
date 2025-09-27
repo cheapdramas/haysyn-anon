@@ -4,6 +4,7 @@ from backend.db.utils import db_helper
 from backend.schemas.post import (
 	PostBase,
 	PostCreate,
+	PostInRedis,
 	PostRead
 )
 from backend.schemas.comment import (
@@ -11,11 +12,17 @@ from backend.schemas.comment import (
 	CommentCreate,
 	CommentRead
 )
+from backend.core.auth import id_generator
+from backend.core.Redis import client as redis_client
+from backend.core.Redis import scripts as redis_scripts 
+
+
 from faker import Faker
 from enum import Enum
 from colorama import Fore, Back, Style, init
 
 import os
+import asyncio
 
 text_sizes = {"small" : 50, "big": 2000}
 fake = Faker()
@@ -27,14 +34,42 @@ init(autoreset=True)
 def clear_term():
     os.system('cls' if os.name == 'nt' else 'clear')
 
+async def createPostRedis(text_size: str, amount: int = 1) -> bool:
+    if not isinstance(text_size, str) or not isinstance(amount, int):
+        return False
+    size_text:int | None = text_sizes.get(text_size)
+    if not size_text: 
+        print(Fore.RED + f"'{text_size}' is not valid size")
+        print(f"Valid sizes: {[size for size in text_sizes.keys()]}")
+        return False
 
-def createPost(text_size: str, amount: int = 1, ) -> bool:
+
+    await redis_client.init_redis()
+
+    
+    for _ in range(amount):
+        post = PostCreate(title="Title", text=fake.text(max_nb_chars=size_text))
+        try:
+            post_id = str(next(id_generator))
+            await redis_scripts.add_post(post_id, post, [])
+            print(Fore.GREEN + f"Post {post_id} created in redis✅")
+        except Exception as e:
+            print(Fore.RED + f"❌ Post creation failed! Exception: \n {str(e)}")
+
+
+
+        
+
+
+
+
+
+def createPost(text_size: str, amount: int = 1) -> bool:
     "Creates <amount> posts to db with random text"
     #check argument types
     if not isinstance(text_size, str) or not isinstance(amount, int):
         return False
     size_text:int | None = text_sizes.get(text_size)
-
     if not size_text: 
         print(Fore.RED + f"'{text_size}' is not valid size")
         print(f"Valid sizes: {[size for size in text_sizes.keys()]}")
@@ -42,13 +77,18 @@ def createPost(text_size: str, amount: int = 1, ) -> bool:
 
     for _ in range(amount):
         post = PostCreate(title="Title", text=fake.text(max_nb_chars=size_text))
-        with db_helper.session_factory() as session:
-            try:
+        try: 
+
+            #add post to db
+            with db_helper.session_factory() as session:
                 created_post = PostCrud.create_post(post, session)
                 print(Fore.GREEN + f"Post {created_post.id} created ✅")
-            except Exception as e:
-                print(Fore.RED + f"❌ Post creation failed! Exception: \n {str(e)}")
+
+        except Exception as e:
+            print(Fore.RED + f"❌ Post creation failed! Exception: \n {str(e)}")
+
     return True
+
 
 
 def createComment(post_id: int, amount:int, text_size: str) -> bool:
@@ -95,10 +135,15 @@ def parse_user_input(tokens: list[str]) -> bool:
             try:
                 amount = int(tokens[1])
                 text_size = tokens[2]
-
-                createPost(text_size, amount)
+                
+                #create post inside redis
+                if len(tokens) > 3 and tokens[3] == 'r':
+                   asyncio.run(createPostRedis(text_size, amount))
+                #create post inside database
+                else: 
+                    createPost(text_size, amount)
             except ValueError:
-                print(Fore.RED + "❌ Parameter №1 should be integer (amount of posts)")
+                print(Fore.RED + "❌ Bad parameters")
 
 
         case "createCom":

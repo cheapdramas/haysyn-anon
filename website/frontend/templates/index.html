@@ -15,9 +15,32 @@
 <body>
   {% include "header.html" %}
   <main id="feed"></main>
-  <footer>
-    <textarea placeholder="Скажи щось..." onclick="openModal()" readonly></textarea>
-  </footer>
+	<footer id="footer-panel">
+		<textarea id="openModalBtn" placeholder="Скажи щось..." readonly></textarea>
+
+		<div class="btn-group" role="toolbar" aria-label="footer controls">
+			<button id="scrollTopBtn" aria-label="Scroll to top" class="icon-btn">
+				<!-- up arrow SVG (белая заливка) -->
+				<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+					<path fill="gray" d="M12 4l-8 8h5v8h6v-8h5z"/>
+				</svg>
+			</button>
+
+			<button id="scrollBottomBtn" aria-label="Scroll to bottom" class="icon-btn">
+				<!-- down arrow SVG -->
+				<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+					<path fill="gray" d="M12 20l8-8h-5V4h-6v8H4z"/>
+				</svg>
+			</button>
+
+			<button id="refreshBtn" aria-label="Refresh feed" class="icon-btn">
+				<!-- refresh SVG -->
+				<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+					<path fill="gray" d="M17.65 6.35A7.95 7.95 0 0 0 12 4V1L7 6l5 5V7c2.76 0 5 2.24 5 5a5 5 0 0 1-5 5 5 5 0 0 1-4.9-4H5.1A7.99 7.99 0 0 0 12 20c4.41 0 8-3.59 8-8 0-1.85-.63-3.55-1.85-4.65z"/>
+				</svg>
+			</button>
+		</div>
+	</footer>
 
   <!-- Modal -->
   <div id="overlay">

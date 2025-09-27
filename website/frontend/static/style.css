@@ -123,6 +123,117 @@ footer {
 	height: 2.5rem;
 	line-height: 1.2rem;
   }
+
+.btn-group {
+  display: flex;
+  gap: 0.4rem;/* тени/эффект при наведении и нажатии */
+.icon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.14);
+}
+.icon-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+/* если хочешь более округлённую/плоскую кнопку на мобильных */
+@media (max-width: 480px) {
+  .icon-btn { flex: 0 0 48px; border-radius: 10px; }
+  #footer-panel textarea { height: 2.6rem; }
+}
+	align-items: stretch;
+}
+
+.icon-btn {
+  flex: 0 0 56px;          /* фиксированная ширина кнопки */
+  height: 100%;            /* занимает всю высоту футера */
+  padding: 0;              /* иконка центрируется через flex */
+  border: none;
+  border-radius: 12px;
+  background: #111;        /* темный фон — иконки будут белыми */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s;
+}
+
+/* тени/эффект при наведении и нажатии */
+.icon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.14);
+}
+.icon-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+/* если хочешь более округлённую/плоскую кнопку на мобильных */
+@media (max-width: 480px) {
+  .icon-btn { 
+		flex: 0 0 48px; 
+		border-radius: 10px;
+		padding: 6px;
+		font-size: 18px;
+	}
+
+  #footer-panel textarea { height: 2.6rem; }
+}
+
+/* --- Футер: растянуть кнопки по высоте --- */
+#footer-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.4rem;
+  display: flex;
+  gap: 0.5rem;
+  background: white;
+  border-top: 1px solid #ddd;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.03);
+  align-items: stretch; /* ВАЖНО: чтобы дети растягивались по высоте */
+  z-index: 100;
+}
+
+#footer-panel textarea {
+  flex: 1 1 auto;
+  padding: 0.6rem 0.8rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  resize: none;
+  height: 2.8rem;          /* базовая высота */
+  line-height: 1.2rem;
+  align-self: center;      /* если надо центрировать текстовую область */
+}
+
+
+
+
+
+.btn-group button {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.2rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #f9f9f9;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn-group button:hover {
+  background: #eee;
+}
+
+.btn-group button:active {
+  transform: scale(0.95);
+}
+
+
+
   
   .post {
 	background: white;

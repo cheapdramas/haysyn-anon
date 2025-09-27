@@ -7,13 +7,16 @@ from backend.views import router as views_router
 from backend.api import router as api_router
 
 from backend.db.utils import db_helper 
+import backend.core.Redis.client as redis_client 
 from backend.core.config import STATIC_FILES_PATH
 import uvicorn
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-	db_helper.db_init()
-	yield
+    db_helper.db_init()
+    await redis_client.init_redis()
+    yield
+    await redis_client.close_redis()
 
 app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=STATIC_FILES_PATH), name="static")

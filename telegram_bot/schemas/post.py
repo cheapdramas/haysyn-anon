@@ -1,5 +1,9 @@
+from pydantic import BaseModel
 from enum import Enum
 
-class PostStatus(Enum):
-    APPROVED = "approved"
-    DECLINED = "declined"
+class PostModStatus(Enum):
+    approved = "approved"
+    declined = "declined"
+class WSPostModerate(BaseModel):
+    post_id: str
+    status: PostModStatus

@@ -1,4 +1,4 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 def keyboard_mod(post_id: str) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(
@@ -10,3 +10,15 @@ def keyboard_mod(post_id: str) -> InlineKeyboardMarkup:
 
     return keyboard
 
+
+def keyboard_webapp()  -> InlineKeyboardMarkup:
+    web_button = InlineKeyboardButton(
+        text="Anon",
+        web_app=WebAppInfo(url="http://127.0.0.0.1:8000/")
+    )
+
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[[web_button]]  # одна кнопка в одной строке
+    )
+
+    return keyboard

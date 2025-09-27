@@ -1,5 +1,5 @@
 import redis.asyncio as redis
-from core.config import ADMINS
+from backend.core.config import ADMINS
 
 r: redis.Redis | None = None
 

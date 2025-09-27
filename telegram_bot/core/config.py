@@ -12,7 +12,8 @@ def get_from_env(key: str) -> str:
         exit()
     return result
 
-POST_SERVICE_KEY = get_from_env("POST_SERVICE_KEY") 
+KEY = get_from_env("KEY") 
 ADMINS = get_from_env("ADMINS").split(',')
+DATABASE_URL = get_from_env("DATABASE_URL")
 TELEGRAM_BOT_TOKEN = get_from_env("TELEGRAM_BOT_TOKEN")
 WEBSOCKET_URL = get_from_env("WEBSOCKET_URL")
