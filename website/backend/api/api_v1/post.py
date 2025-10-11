@@ -23,6 +23,7 @@ from backend.schemas.post import (
 )
 from backend.db.utils import db_helper
 from backend.core.auth import id_generator, verify_token_depends
+from backend.core.utils import fall_free
 
 import backend.core.Redis.scripts as redis_scripts
 
@@ -30,8 +31,8 @@ import backend.core.Redis.scripts as redis_scripts
 
 router = APIRouter()
 
-#COMMENTED BECAUSE WE WILL PROBABLY ADD POSTS ONLY THROUGH WEBSOCKET CONNECTIONS WITH ADMIN FROM TELEGRAM BOT 
 @router.post("/post", response_model=PostRead)
+@fall_free()
 async def create_post(
     post_id: str,
 	session: Annotated[
@@ -40,11 +41,17 @@ async def create_post(
 	],
     token: str = Depends(verify_token_depends("bot"))
 ):
+    """Creates post in database
+    Takes post data from Redis by post_id
+    Token must be released from bot
+    """
+
     post_data = await redis_scripts.remove_post(post_id) 
     post_model = await PostCrud.create_post(post_data, session)
     return post_model
 
 @router.get("/post",response_model=PostRead)
+@fall_free()
 async def get_post(
     session: Annotated[
         AsyncSession,
@@ -58,6 +65,7 @@ async def get_post(
     return post
 
 @router.get("/posts",response_model=List[PostRead])
+@fall_free()
 async def get_posts(
     session: Annotated[
         AsyncSession,
@@ -66,18 +74,24 @@ async def get_posts(
     start: Annotated[int,Field(gt=-1)],
     amount: Annotated[int,Field(gt=0, lt=101)]
 ):
+    """Returns <amount> of posts, starting from <start>"""
     posts = await PostCrud.get_posts(
         start=start,
         amount=amount,
         session=session
     )
+
     return posts
 
 
 @router.post("/submit_post")
+@fall_free()
 async def submit_post(
     post: PostBase
 ):
+    """Put's post in Redis
+    Redis then sends post_id to channel
+    """
     post_id = str(next(id_generator))
     await redis_scripts.add_post(post_id, post)
     return post_id 

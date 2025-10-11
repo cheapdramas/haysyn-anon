@@ -1,3 +1,4 @@
+from re import L
 from colorama.ansi import clear_screen
 from backend.db.crud import PostCrud, CommentCrud
 from backend.db.utils import db_helper 
@@ -95,6 +96,14 @@ async def getRedisPosts():
         print(f"Post '{i}':  ", post_data)
 
 
+async def getRedisPostsUnprocessed():
+    r = await redis_client.get_redis()
+    unproc_post_keys = await r.smembers("unprocessed_posts")
+    for i in unproc_post_keys:
+        print(Fore.YELLOW + f" Unprocessed post: {i}")
+    print(Fore.BLUE + f"Total unprocessed_posts: {len(unproc_post_keys)}")
+
+
 async def createComment(post_id: int, amount:int, text_size: str) -> bool:
     if not isinstance(post_id, int) \
         or not isinstance(amount, int) \
@@ -152,9 +161,17 @@ async def parse_user_input(tokens: list[str]) -> bool:
 
         case "getPosts":
             try:
-                await getRedisPosts() 
+                if len(tokens) > 1:
+                    is_getting_unprocessed = tokens[1]
+                    if is_getting_unprocessed == "unproc":
+                        await getRedisPostsUnprocessed() 
+                    else:
+                        print(Fore.RED + f"Bad argument '{is_getting_unprocessed}'")
+                else:
+                    await getRedisPosts() 
             except Exception as e:
                 print(Fore.RED + "Error occured! ",str(e))
+
 
 
         case "createCom":

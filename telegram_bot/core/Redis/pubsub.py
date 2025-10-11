@@ -1,5 +1,5 @@
 from core.Redis.client import get_redis
-from core.Redis.scripts import get_post
+from core.Redis.scripts import get_post, remove_unprocessed_post
 from core.config import REDIS_CHANNEL_NAME
 from core.messages import mod_message
 from keyboards.inline import keyboard_mod
@@ -13,6 +13,7 @@ async def listen_to_redis(admin_id: str, admin_message):
     await pubsub.subscribe(REDIS_CHANNEL_NAME)
 
     print("Listening to Redis ...")
+    
     
     async for message in pubsub.listen():
         print("Pubsub got data from channel: ", message)
@@ -32,6 +33,8 @@ async def listen_to_redis(admin_id: str, admin_message):
                 admin_id=admin_id,
                 post_id=post_id
             )
+            # remove post_id from unprocessed_posts
+            await remove_unprocessed_post("post:" + post_id)
 
             
 

@@ -12,7 +12,7 @@ async def init_redis() -> redis.Redis:
         await r.sadd("admins", *ADMINS)
     return r
 
-def get_redis() -> redis.Redis:
+async def get_redis() -> redis.Redis:
     global r
     if r is None:
         raise RuntimeError("Redis not initialized. Did you forget app startup event?")

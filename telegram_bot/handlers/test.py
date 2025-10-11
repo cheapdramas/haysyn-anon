@@ -2,7 +2,6 @@ from asyncio import start_server
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
-from keyboards.inline import keyboard_webapp
 from core.messages import mod_message
 from aiogram import Router, Bot 
 from aiogram.types import CallbackQuery

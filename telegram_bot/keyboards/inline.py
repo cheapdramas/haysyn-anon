@@ -1,4 +1,4 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo,ReplyKeyboardMarkup, KeyboardButton
 
 def keyboard_mod(post_id: str) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(
@@ -14,7 +14,7 @@ def keyboard_mod(post_id: str) -> InlineKeyboardMarkup:
 def keyboard_webapp()  -> InlineKeyboardMarkup:
     web_button = InlineKeyboardButton(
         text="Anon",
-        web_app=WebAppInfo(url="http://127.0.0.0.1:8000/")
+        web_app=WebAppInfo(url="https://extracapsular-earline-perspectiveless.ngrok-free.dev/")
     )
 
     keyboard = InlineKeyboardMarkup(
