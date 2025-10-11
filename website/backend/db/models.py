@@ -7,11 +7,14 @@ from sqlalchemy import (
     String,DateTime, func,
     ForeignKey
 )
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.ext.asyncio import AsyncAttrs
+from sqlalchemy.orm import DeclarativeBase 
+
 
 from backend.schemas.post import MAX_TITLE_LEN, MAX_TEXT_LEN
 
-Base = declarative_base()
+class Base(AsyncAttrs ,DeclarativeBase):
+    pass
 
 class Post(Base):
     __tablename__ = "posts"

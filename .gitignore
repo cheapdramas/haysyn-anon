@@ -5,6 +5,7 @@ __pycache__/
 
 # Database
 *.sqlite3
+snapshots/
 
 # Environments
 .venv

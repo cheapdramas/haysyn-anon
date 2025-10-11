@@ -1,4 +1,8 @@
-from pydantic import BaseModel, StringConstraints
+from pydantic import (
+    BaseModel, 
+    StringConstraints,
+    ConfigDict
+)
 from typing import Annotated 
 from .post import MAX_TEXT_LEN 
 
@@ -10,4 +14,8 @@ class CommentCreate(CommentBase):
 
 
 class CommentRead(CommentCreate):
-	id: int
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
+
+    id: int

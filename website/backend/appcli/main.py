@@ -44,14 +44,13 @@ async def createPostRedis(text_size: str, amount: int = 1) -> bool:
         return False
 
 
-    await redis_client.init_redis()
 
     
     for _ in range(amount):
         post = PostCreate(title="Title", text=fake.text(max_nb_chars=size_text))
         try:
             post_id = str(next(id_generator))
-            await redis_scripts.add_post(post_id, post, [])
+            await redis_scripts.add_post(post_id, post)
             print(Fore.GREEN + f"Post {post_id} created in redis✅")
         except Exception as e:
             print(Fore.RED + f"❌ Post creation failed! Exception: \n {str(e)}")
@@ -64,7 +63,7 @@ async def createPostRedis(text_size: str, amount: int = 1) -> bool:
 
 
 
-def createPost(text_size: str, amount: int = 1) -> bool:
+async def createPost(text_size: str, amount: int = 1) -> bool:
     "Creates <amount> posts to db with random text"
     #check argument types
     if not isinstance(text_size, str) or not isinstance(amount, int):
@@ -75,23 +74,28 @@ def createPost(text_size: str, amount: int = 1) -> bool:
         print(f"Valid sizes: {[size for size in text_sizes.keys()]}")
         return False
 
-    for _ in range(amount):
-        post = PostCreate(title="Title", text=fake.text(max_nb_chars=size_text))
-        try: 
+    async with db_helper.session_factory() as session:
+        for _ in range(amount):
+            post = PostCreate(title="Title", text=fake.text(max_nb_chars=size_text))
+            try: 
 
-            #add post to db
-            with db_helper.session_factory() as session:
-                created_post = PostCrud.create_post(post, session)
-                print(Fore.GREEN + f"Post {created_post.id} created ✅")
+                #add post to db
+                    created_post = await PostCrud.create_post(post, session)
+                    print(Fore.GREEN + f"Post {created_post.id} created ✅")
 
-        except Exception as e:
-            print(Fore.RED + f"❌ Post creation failed! Exception: \n {str(e)}")
+            except Exception as e:
+                print(Fore.RED + f"❌ Post creation failed! Exception: \n {str(e)}")
 
     return True
 
+async def getRedisPosts():
+    r = await redis_client.get_redis()
+    async for i in r.scan_iter(match="post:*"):
+        post_data = await r.hgetall(i)
+        print(f"Post '{i}':  ", post_data)
 
 
-def createComment(post_id: int, amount:int, text_size: str) -> bool:
+async def createComment(post_id: int, amount:int, text_size: str) -> bool:
     if not isinstance(post_id, int) \
         or not isinstance(amount, int) \
         or not isinstance(text_size, str):
@@ -105,9 +109,9 @@ def createComment(post_id: int, amount:int, text_size: str) -> bool:
 
     for _ in range(amount):
         comment = CommentCreate(post_id=post_id,text=fake.text(max_nb_chars=size_text))
-        with db_helper.session_factory() as session:
+        async with db_helper.session_factory() as session:
             try:
-                created_comment = CommentCrud.create_comment(comment, session)
+                created_comment = await CommentCrud.create_comment(comment, session)
                 print(Fore.GREEN + f"Comment {created_comment.id} created ✅")
             except Exception as e:
                 print(Fore.RED + f"❌ Comment creation failed! Exception: \n {str(e)}")
@@ -115,7 +119,7 @@ def createComment(post_id: int, amount:int, text_size: str) -> bool:
     return True
 
 
-def parse_user_input(tokens: list[str]) -> bool:
+async def parse_user_input(tokens: list[str]) -> bool:
     operation = tokens[0]
 
     match operation:
@@ -138,12 +142,19 @@ def parse_user_input(tokens: list[str]) -> bool:
                 
                 #create post inside redis
                 if len(tokens) > 3 and tokens[3] == 'r':
-                   asyncio.run(createPostRedis(text_size, amount))
+                   await createPostRedis(text_size, amount)
                 #create post inside database
                 else: 
-                    createPost(text_size, amount)
+                    await createPost(text_size, amount)
             except ValueError:
                 print(Fore.RED + "❌ Bad parameters")
+        
+
+        case "getPosts":
+            try:
+                await getRedisPosts() 
+            except Exception as e:
+                print(Fore.RED + "Error occured! ",str(e))
 
 
         case "createCom":
@@ -155,7 +166,7 @@ def parse_user_input(tokens: list[str]) -> bool:
                 amount = int(tokens[2])
                 text_size = tokens[3]
 
-                createComment(post_id, amount, text_size)
+                await createComment(post_id, amount, text_size)
             except ValueError:
                 print(Fore.RED + "❌ Parameter №1 should be integer (post_id) and parameter №2 should be integer (amount of comments)")
 
@@ -164,12 +175,14 @@ def parse_user_input(tokens: list[str]) -> bool:
     return False
     
 
-def main():
+async def main():
     clear_term()
     print(Fore.BLUE + "'help' to view all commands")
     print(Fore.BLUE + "'p' to execute previous command")
     print(Fore.RED + "'q' to quit")
     previous_command = ""
+    await db_helper.db_init()
+    await redis_client.init_redis()
     while True:
         user_input = input("\nHaysyn app control 🧰 > ")
 
@@ -179,9 +192,9 @@ def main():
             print(previous_command)
         previous_command = user_input
 
-        do_quit = parse_user_input(user_input.split(' '))
+        do_quit = await parse_user_input(user_input.split(' '))
         
         if do_quit:
             return 
         
-main()
+asyncio.run(main())

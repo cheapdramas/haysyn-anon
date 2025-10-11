@@ -12,63 +12,85 @@ from backend.schemas.comment import (
 )
 from fastapi import HTTPException,status
 
-from typing import List
+from typing import Sequence
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy.future import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func
 
 class PostCrud:
     @staticmethod
-    def create_post(
-        post_create: PostCreate,
-        session: Session 
+    async def create_post(
+        post_create: PostCreate | dict,
+        session: AsyncSession 
     ) -> Post:
-        post = Post(**post_create.model_dump())
+        if isinstance(post_create, PostCreate):
+            post = Post(**post_create.model_dump())
+        else:
+            post = Post(**post_create)
+
         try:
             session.add(post)
-            session.commit()
+            await session.commit()
+            await session.refresh(post)
+            print("KINDA CREATING POST")
             return post
         except Exception as exc:
-            session.rollback()
+            await session.rollback()
             print("POST CREATE ERROR: ", exc)
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST) 
 
     @staticmethod
-    def get_post(
+    async def get_post(
         id: int,
-        session: Session
-    ) -> PostRead:
-        return session.get(Post, id)
+        session: AsyncSession
+    ) -> Post | None:
+        return await session.get(Post, id)
         
     @staticmethod
-    def get_posts(
-        session: Session,
+    async def get_posts(
+        session: AsyncSession,
         amount: int,
         start: int = 0,
-    ) -> List[PostRead]:
-        return session.query(Post).order_by(Post.id.desc()).offset(start).limit(amount).all()
+    ) -> Sequence[Post]:
+        #select the latest <amount> of posts from <start> with limited text to 200 characters
+        query = select(
+            Post.id,
+            Post.title,
+            func.substr(Post.text, 1, 200).label("text")
+        ).order_by(Post.id.desc()).offset(start).limit(amount)
+
+        result = await session.execute(query)
+        posts = result.all()
+        return posts
 
 
 class CommentCrud:
     @staticmethod
-    def create_comment(
+    async def create_comment(
         comment_create: CommentCreate,
-        session: Session
-    ) -> Comment:
+        session: AsyncSession
+    ) -> CommentRead:
         comment = Comment(**comment_create.model_dump())
         try:
             session.add(comment)
-            session.commit()
-            return comment
+            await session.commit()
+            await session.refresh(comment)
+            return CommentRead.model_validate(comment) 
         except Exception as exc:
-            session.rollback()
+            await session.rollback()
             print("CREATE COMMENT ERROR: ", exc)
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST) 
 
     @staticmethod
-    def get_comments(
-        session: Session,
+    async def get_comments(
+        session: AsyncSession,
         post_id: int,
         amount: int,
         start: int = 0,
-    ) -> List[Comment]:
-        return session.query(Comment).order_by(Comment.id.desc()).filter(Comment.post_id==post_id).offset(start).limit(amount)
+    ) -> Sequence[Comment]:
+        query = select(Comment).order_by(Comment.id.desc()).filter(Comment.post_id==post_id).offset(start).limit(amount)
+
+        result = await session.execute(query)
+        print(result)
+        return result.scalars().all()

@@ -15,5 +15,6 @@ def get_from_env(key: str) -> str:
 KEY = get_from_env("KEY") 
 ADMINS = get_from_env("ADMINS").split(',')
 DATABASE_URL = get_from_env("DATABASE_URL")
+REDIS_CHANNEL_NAME = "posts"
 TELEGRAM_BOT_TOKEN = get_from_env("TELEGRAM_BOT_TOKEN")
-WEBSOCKET_URL = get_from_env("WEBSOCKET_URL")
+WEBSITE_URL_API = get_from_env("WEBSITE_URL_API")

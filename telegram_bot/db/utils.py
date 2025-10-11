@@ -1,28 +1,30 @@
 """
 	Utils for database usage
 """
-
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.engine import Engine 
-
+from sqlalchemy.ext.asyncio import (
+    create_async_engine,
+    AsyncEngine,
+    async_sessionmaker,
+    AsyncSession,
+)
 from .models import Base
-
+from typing import AsyncGenerator
 from core.config import DATABASE_URL
 
 
 class DatabaseHelper:
     def __init__(self, url: str):
-        self.engine = create_engine(url, connect_args={"check_same_thread": False})
-        self.session_factory = sessionmaker(
+        self.engine: AsyncEngine = create_async_engine(url)
+        self.session_factory = async_sessionmaker(
             bind=self.engine,
             autoflush=False,
             expire_on_commit=True          
 		)
-    def db_init(self) -> None:
-        Base.metadata.create_all(bind=self.engine)
-    def session_getter(self) -> Session:
-        with self.session_factory() as session:
+    async def db_init(self) -> None:
+        async with self.engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    async def session_getter(self) -> AsyncGenerator[AsyncSession, None]:
+        async with self.session_factory() as session:
             yield session 
 
 db_helper = DatabaseHelper(DATABASE_URL)

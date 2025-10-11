@@ -44,7 +44,7 @@ function renderPosts(posts, replace = false) {
     div.className = "post";
 
     const previewText =
-      post.text.length > 200 ? post.text.slice(0, 200) + "..." : post.text;
+      post.text.length === 200 ? post.text + "..." : post.text;
 
     div.innerHTML = `
       <a href="/post/${post.id}" class="post-link" 

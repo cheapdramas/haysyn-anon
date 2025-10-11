@@ -1,5 +1,4 @@
 import redis.asyncio as redis
-from backend.core.config import ADMINS
 
 r: redis.Redis | None = None
 
@@ -7,9 +6,6 @@ async def init_redis() -> redis.Redis:
     global r
     if r is None:
         r = redis.Redis(host="localhost", port=6379, decode_responses=True)
-        #commented because of AOF turned on
-        # await r.flushdb()
-        await r.sadd("admins", *ADMINS)
     return r
 
 def get_redis() -> redis.Redis:
@@ -23,3 +19,4 @@ async def close_redis():
     if r is not None:
         await r.close()
         r = None
+

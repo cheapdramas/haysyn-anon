@@ -10,8 +10,9 @@ python = "^3.12"
 aiogram = "^3.22.0"
 dotenv = "^0.9.9"
 pyjwt = "^2.10.1"
-websockets = "^15.0.1"
-sqlalchemy = "^2.0.43"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.44"}
+aiosqlite = "^0.21.0"
+redis = "^6.4.0"
 
 
 [build-system]

@@ -13,7 +13,7 @@ import uvicorn
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    db_helper.db_init()
+    await db_helper.db_init()
     await redis_client.init_redis()
     yield
     await redis_client.close_redis()

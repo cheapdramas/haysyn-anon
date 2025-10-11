@@ -1,50 +1,58 @@
+from sqlalchemy.future import select
 from .utils import db_helper
 from .models import ModMessages 
-
+from typing import Sequence
 
 class ModMessagesCrud:
     @staticmethod
-    def add(
+    async def add(
         message_id: int,
         admin_id: int,
         post_id: str
     ) -> ModMessages:
         try:
-            with db_helper.session_factory() as session:
+            async with db_helper.session_factory() as session:
                 message_info = ModMessages(
                     message_id = message_id,
                     admin_id = admin_id,
                     post_id = post_id
                 )
                 session.add(message_info)
-                session.commit()
+                await session.commit()
+                await session.refresh(message_info)
                 return message_info
         except Exception as e:
-            print("Error occured while adding mod message to db: ",str(e))
+            print("Error occured! ModMessagesCrud.add : ",str(e))
 
     @staticmethod
-    def get(post_id: str) -> list[ModMessages]:
+    async def get(post_id: str) -> Sequence[ModMessages]:
         try:
-            with db_helper.session_factory() as session:
-                return session.query(ModMessages).filter(ModMessages.post_id == post_id).all()
+            async with db_helper.session_factory() as session:
+                q = select(ModMessages).filter(ModMessages.post_id == post_id)
 
+                result = await session.execute(q)
+                return result.scalars().all()
         except Exception as e:
-            print(f"Error occured while getting mod message with post_id: {post_id}: ",str(e))
+            print(f"Error occured! ModMessagesCrud.get with post_id: {post_id}: ",str(e))
 
     @staticmethod
-    def delete(post_id:str):
+    async def delete(post_id:str) -> bool:
         try:
-            with db_helper.session_factory() as session:
-                (
-                    session.query(ModMessages)
+            async with db_helper.session_factory() as session:
+                q = (
+                    select(ModMessages)
                     .filter(
                         ModMessages.post_id == post_id
                     )
-                    .delete(synchronize_session=False)
                 )
-                session.commit()
+                posts = await session.execute(q)
+
+                for post in posts.scalars():
+                    await session.delete(post)
+                await session.commit()
                 return True
         except Exception as e:
-            print(f"Error occured while getting mod message with post_id: {post_id}: ",str(e))
+            print(f"Error occured! ModMessagesCrud.delete with post_id: {post_id}: ",str(e))
+            return False
 
 

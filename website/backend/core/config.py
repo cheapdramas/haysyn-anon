@@ -18,6 +18,7 @@ def get_from_env(key: str) -> str:
 TEMPLATES_PATH = BASE_DIR / "frontend" / "templates"
 STATIC_FILES_PATH =  BASE_DIR / "frontend" / "static"
 DATABASE_URL = get_from_env("DATABASE_URL")
+REDIS_CHANNEL_NAME = "posts"
 KEY = get_from_env("KEY")
 ADMINS = get_from_env("ADMINS").split(',')
 
