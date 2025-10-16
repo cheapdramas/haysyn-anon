@@ -83,6 +83,42 @@ async function loadFeedChunk() {
 	return posts;
 }
 
+function showConfirmationModal() {
+  const overlay = document.getElementById("confirmationOverlay");
+  overlay.style.display = "flex";
+  overlay.style.opacity = "0";
+
+  requestAnimationFrame(() => {
+    overlay.style.transition = "opacity 0.3s ease";
+    overlay.style.opacity = "1";
+  });
+
+  // авто-закриття через 1.8 секунди або клік мимо
+  setTimeout(() => closeConfirmationModal(), 1800);
+
+  overlay.addEventListener(
+    "click",
+    (e) => {
+      if (e.target === overlay) closeConfirmationModal();
+    },
+    { once: true }
+  );
+}
+
+function closeConfirmationModal() {
+  const overlay = document.getElementById("confirmationOverlay");
+  overlay.style.opacity = "0";
+  setTimeout(() => {
+    overlay.style.display = "none";
+  }, 300);
+}
+
+// викликати після сабміту
+async function submitPost() {
+  // ... твій код відправки ...
+  showConfirmationModal();
+}
+
 
 // --- Сабміт ---
 async function submitPost() {
@@ -103,14 +139,8 @@ async function submitPost() {
       document.getElementById("titleError").textContent = "";
       document.getElementById("titleError").style.display = "none";
 
-      // localStorage.removeItem(CACHE_KEY);
       closeModal();
-
-      // start = 0;
-      // noMorePosts = false;
-      // document.getElementById("feed").innerHTML = "";
-      // await loadFeedChunk();
-      // window.scrollTo({ top: 0, behavior: "smooth" });
+      showConfirmationModal();
     }
   } catch (err) {
     console.error("Post failed", err);

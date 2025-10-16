@@ -12,14 +12,7 @@ async def main() -> None:
 
 
     bot = Bot(token=TELEGRAM_BOT_TOKEN)
-    # Устанавливаем кнопку WebApp в меню бота
-    await bot.set_chat_menu_button(
-        menu_button={
-            "type": "web_app",
-            "text": "Anon",
-            "web_app": {"url": "https://extracapsular-earline-perspectiveless.ngrok-free.dev/"} 
-        }
-    )
+   
     dp = Dispatcher()
     
     dp.include_router(router)

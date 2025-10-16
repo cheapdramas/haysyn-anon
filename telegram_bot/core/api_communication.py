@@ -13,6 +13,8 @@ async def send_approved_post(post_id: str) -> bool:
     try:
         async with aiohttp.ClientSession() as session:
             resp = await session.post(url, headers=headers)
-            return True 
+        if resp.status == 200:
+            return True
+        return False
     except Exception:
         return False

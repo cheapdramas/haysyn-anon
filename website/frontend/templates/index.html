@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
-  <script src="/static/script.js" defer></script>
+  <script src="/static/script.js?v=4" defer></script>
 </head>
 <body>
   {% include "header.html" %}
@@ -51,6 +51,13 @@
       <textarea id="postText" placeholder="Текст поста..." oninput="autoGrow(this)"></textarea>
 
       
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmationOverlay">
+    <div id="confirmationModal">
+      <p id="confirmationText">Ваш пост скоро буде в ленті</p>
     </div>
   </div>
 
