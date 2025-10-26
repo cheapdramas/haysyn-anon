@@ -6,12 +6,8 @@ from core.Redis.scripts import remove_post as redis_remove_post
 
 router = Router()
 
-
 @router.callback_query(lambda c: c.data and c.data.startswith("approve:"))
 async def approve_handler(callback: CallbackQuery, bot: Bot):
-    user_id = str(callback.from_user.id)
-
-
     post_id = callback.data.split(":")[1]
 
     is_sent_to_api = await send_approved_post(post_id)
@@ -33,13 +29,8 @@ async def approve_handler(callback: CallbackQuery, bot: Bot):
         await callback.answer(f"Connection with API failed 😔")
 
 
-    
-    
-
-
 @router.callback_query(lambda c: c.data and c.data.startswith("decline:"))
 async def decline_handler(callback: CallbackQuery, bot: Bot):
-    user_id = str(callback.from_user.id)
     post_id = callback.data.split(":")[1]
 
     try:

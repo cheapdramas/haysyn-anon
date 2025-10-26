@@ -14,15 +14,20 @@ class PostCreate(PostBase):
     pass
 
 class PostRead(PostBase):
-	id: int
+    id: int
+    likes: int 
+    dislikes: int
 
 class PostInRedis(PostBase):
 	id: str 
 
+class PostSortByOptions(Enum):
+    old="old"
+    new="new"
+    likes="likes"
+    dislikes="dislikes"
 
-class PostModStatus(Enum):
-    approved = "approved"
-    declined = "declined"
-class WSPostModerate(BaseModel):
-    post_id: str
-    status: PostModStatus
+class PostLikeAction(Enum):
+    plus="plus"
+    minus="minus"
+

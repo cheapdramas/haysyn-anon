@@ -3,7 +3,9 @@ from .models import Post, Comment
 from backend.schemas.post import (
 	PostBase,
 	PostCreate,
-	PostRead
+	PostLikeAction,
+	PostRead,
+    PostSortByOptions
 )
 from backend.schemas.comment import (
 	CommentBase,
@@ -16,7 +18,7 @@ from typing import Sequence
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import func
+from sqlalchemy import func, update
 
 class PostCrud:
     @staticmethod
@@ -50,19 +52,88 @@ class PostCrud:
     @staticmethod
     async def get_posts(
         session: AsyncSession,
+        sort_by: PostSortByOptions,
         amount: int,
         start: int = 0,
-    ) -> Sequence[Post]:
+    ) -> Sequence[PostRead]:
         #select the latest <amount> of posts from <start> with limited text to 200 characters
         query = select(
             Post.id,
             Post.title,
+            Post.likes,
+            Post.dislikes,
             func.substr(Post.text, 1, 200).label("text")
-        ).order_by(Post.id.desc()).offset(start).limit(amount)
+        )
+        if sort_by == "new":
+            query = query.order_by(Post.id.desc()).offset(start).limit(amount)
+
+        if sort_by == "likes":
+            query = query.order_by(Post.likes.desc()).offset(start).limit(amount)
+
 
         result = await session.execute(query)
         posts = result.all()
         return posts
+
+    @staticmethod
+    async def get_likes(
+        session: AsyncSession,
+        post_id: int
+    ):
+        try:
+            q = select(Post.likes).where(Post.id==post_id) 
+            res = await session.execute(q)
+            return res.scalar_one()
+        except Exception as e:
+            print("Error occured in post get like method: ", str(e))
+
+    @staticmethod
+    async def get_dislikes(
+        session: AsyncSession,
+        post_id: int
+    ):
+        try:
+            q = select(Post.dislikes).where(Post.id==post_id) 
+            res = await session.execute(q)
+            return res.scalar_one()
+        except Exception as e:
+            print("Error occured in post get like method: ", str(e))
+
+
+    @staticmethod
+    async def like(
+        session: AsyncSession,
+        post_id: int,
+        action: PostLikeAction
+    ):
+        add = 1
+        if action == "minus":
+            add = - 1
+
+        try:
+            q = update(Post).where(Post.id==post_id).values(likes=Post.likes  + add)
+            await session.execute(q)
+            await session.commit()
+
+        except Exception as e:
+            print("Error occured in post like method: ",str(e))
+
+    @staticmethod
+    async def dislike(
+        session: AsyncSession,
+        post_id: int,
+        action: PostLikeAction
+    ):
+        add = 1
+        if action == "minus":
+            add = - 1
+
+        try:
+            q = update(Post).where(Post.id==post_id).values(dislikes=Post.dislikes + add)
+            await session.execute(q)
+            await session.commit()
+        except Exception as e:
+            print("Error occured in post dislike method: ",str(e))
 
 
 class CommentCrud:

@@ -1,16 +1,39 @@
 // ВСЬО САМ СУКА
+// --- Керуємо scroll restoration ---
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "auto";
+}
 
+
+
+
+
+// позначаємо reload
+window.addEventListener("beforeunload", () => {
+  sessionStorage.setItem("was_reloaded", "1");
+});
+
+// після завантаження перевіряємо
+window.addEventListener("DOMContentLoaded", () => {
+  const wasReloaded = sessionStorage.getItem("was_reloaded");
+  if (wasReloaded === "1") {
+    sessionStorage.removeItem("was_reloaded");
+    window.scrollTo(0, 0); // тепер точно зверху
+  }
+});
 // --- Конфіг ---
 const POSTS_PER_PAGE = 50;
 const CACHE_KEY = "cachedPosts";
-const CACHE_TTL_MS = 10000; // 10 секунд
+const CACHE_TTL_MS = 5000; // 10 секунд
 //
-let start = 0;
 let loading = false;
 let noMorePosts = false;
 //
 //
-function saveToCache(posts, start) {
+//
+//
+//
+function saveToCache(posts) {
   const cacheData = {
     posts,
     timestamp: Date.now(),
@@ -39,22 +62,31 @@ function renderPosts(posts, replace = false) {
   const feed = document.getElementById("feed");
   if (replace) feed.innerHTML = "";
 
-  posts.forEach((post) => {
+  posts.forEach((post, index) => {
     const div = document.createElement("div");
     div.className = "post";
+		let last_post = feed.lastChild;
+		div.setAttribute("index", last_post == null ? 0 : parseInt(last_post.getAttribute("index")) + 1);
 
     const previewText =
       post.text.length === 200 ? post.text + "..." : post.text;
 
     div.innerHTML = `
       <a href="/post/${post.id}" class="post-link" 
-         data-id="${post.id}" 
+         data-id="${post.id}"
          data-title="${encodeURIComponent(post.title)}" 
          data-text="${encodeURIComponent(post.text)}"
          style="text-decoration:none;color:inherit;">
         <strong>${post.title}</strong><br>
         <span class="preview-text">${previewText}</span>
-      </a>`;
+      </a>
+
+			<div class="post-likes">
+        <span>👍 ${post.likes}</span>
+        <span>👎 ${post.dislikes}</span>
+      </div>
+
+			`;
     feed.appendChild(div);
   });
 }
@@ -66,15 +98,22 @@ async function loadFeedChunk() {
   loading = true;
 	let posts = null
 	try {
-    const res = await fetch(`/api/api_v1/posts?start=${start}&amount=${POSTS_PER_PAGE}`);
+		const posts_feed = document.getElementById("feed");
+		
+		const last_post = posts_feed.lastChild;
+		console.log(last_post);
+		let last_post_index = 0;
+		if (last_post != null){
+			last_post_index = last_post.getAttribute("index");
+		}
+    console.log(last_post_index);
+		const res = await fetch(`/api/api_v1/posts?start=${last_post_index}&amount=${POSTS_PER_PAGE}`);
 		posts = await res.json();
 
 		if (posts.length === 0) {
 			noMorePosts = true;
 		}
 		renderPosts(posts);
-		start += posts.length;
-		// saveToCache(posts)
   } catch (err) {
     console.error("Error loading posts", err);
   }
@@ -151,7 +190,7 @@ async function submitPost() {
 function openModal() {
   document.getElementById("overlay").style.display = "flex";
   document.getElementById("feed").classList.add("blurred");
-  document.querySelector("footer").classList.add("blurred");
+  document.getElementById("dock").classList.add("blurred");
   document.body.style.overflow = "hidden";
   document.getElementById("titleError").textContent = "";
   document.getElementById("titleError").style.display = "none";
@@ -164,7 +203,7 @@ function openModal() {
 function closeModal() {
   document.getElementById("overlay").style.display = "none";
   document.getElementById("feed").classList.remove("blurred");
-  document.querySelector("footer").classList.remove("blurred");
+  document.getElementById("dock").classList.remove("blurred");
   document.body.style.overflow = "";
 }
 
@@ -237,24 +276,20 @@ window.addEventListener("scroll", () => {
   }
 });
 //
-document.getElementById("openModalBtn").addEventListener("click", () => {
+document.getElementById("add").addEventListener("click", () => {
   openModal();
 });
-
+//
 document.getElementById("overlay").addEventListener("click", (e) => {
   if (e.target.id === "overlay") closeModal();
 });
 
 
-
-
-// Кнопка "⬆️" — скрол вверх
-document.getElementById("scrollTopBtn").addEventListener("click", () => {
+document.getElementById("up").addEventListener("click", () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
-
-// Кнопка "⬇️" — скрол вниз до останнього поста
-document.getElementById("scrollBottomBtn").addEventListener("click", () => {
+//
+document.getElementById("down").addEventListener("click", () => {
   const feed = document.getElementById("feed");
   const lastPost = feed.lastElementChild;
   if (lastPost) {
@@ -262,41 +297,28 @@ document.getElementById("scrollBottomBtn").addEventListener("click", () => {
   }
 });
 
-// Кнопка "🔄" — оновити сторінку
-document.getElementById("refreshBtn").addEventListener("click", () => {
+document.getElementById("home").addEventListener("click", () => {
   start = 0;
   noMorePosts = false;
   document.getElementById("feed").innerHTML = "";
-	if (!loadFromCache()) {
-		loadFeedChunk().then((posts) => {;
-			if (posts != null) {
-				saveToCache(posts,start);
-			}
-		});
-	}
+	 if (!loadFromCache()) {
+	 	loadFeedChunk().then((posts) => {;
+	 		if (posts != null) {
+	 			saveToCache(posts,start);
+	 		}
+	 	});
+	 }
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 
 
 
-//
-// кешируем інфу поста для того щоб коли ми перейшли на цей пост, ми не робили доп реквеста
-document.addEventListener("click", (e) => {
-  const link = e.target.closest(".post-link");
-  if (link) {
-    const id = link.dataset.id;
-    const title = decodeURIComponent(link.dataset.title);
-    const text = decodeURIComponent(link.dataset.text);
-
-    sessionStorage.setItem("post_data", JSON.stringify({ id, title, text }));
-  }
-});
 
 if (!loadFromCache()) {
 	loadFeedChunk().then((posts) => {;
 		if (posts != null) {
-			saveToCache(posts,start);
+			saveToCache(posts);
 		}
 	});
 }

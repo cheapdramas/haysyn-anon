@@ -54,5 +54,3 @@ class ModMessagesCrud:
         except Exception as e:
             print(f"Error occured! ModMessagesCrud.delete with post_id: {post_id}: ",str(e))
             return False
-
-

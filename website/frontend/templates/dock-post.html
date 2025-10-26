@@ -1,0 +1,27 @@
+<div id="dock" class="dock">
+    <button id="home" class="dock-btn" aria-label="home">
+      <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
+    </button>
+
+   <button id="refresh" class="dock-btn" aria-label="refresh">
+  <svg viewBox="0 0 24 24">
+    <path d="M12 4V1L8 5l4 4V6a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/>
+  </svg>
+</button>
+
+
+    <button id="add-comment" class="dock-btn dock-btn--extrawide" aria-label="add comment">
+			Напишіть коментар...
+    </button>
+
+<!-- прихований режим вводу коментаря -->
+  <div virtualkeyboardpolicy="manual" id="mobile-dock" class="dock hidden dock-comment">
+		<textarea id="commentInput" placeholder="Напиши коментар..."></textarea>
+		<div id="dock-comment-btn-holder">
+			<button id="closeDock" class="dock-btn close">↓</button>
+			<button id="sendComment" class="dock-btn--wide send">↑</button>
+		</div>
+	</div>
+
+
+</div>

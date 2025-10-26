@@ -1,4 +1,3 @@
-
 def mod_message(post_data: dict) -> str: 
     """Message in HTML FORMAT"""
     msg = (

@@ -2,7 +2,6 @@ import jwt
 from core.config import KEY 
 from datetime import datetime, timedelta, timezone
 
-
 def create_jwt(sub:str = "bot",algorithm:str = "HS256"):
     return jwt.encode(
         {"sub": sub,
@@ -11,5 +10,3 @@ def create_jwt(sub:str = "bot",algorithm:str = "HS256"):
         KEY,
         algorithm
     )
-
-print(create_jwt())

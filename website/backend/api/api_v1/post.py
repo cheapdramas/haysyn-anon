@@ -18,8 +18,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.db.crud import PostCrud 
 from backend.schemas.post import (
 	PostBase,
+	PostLikeAction,
 	PostRead,
-    PostInRedis
+    PostSortByOptions
 )
 from backend.db.utils import db_helper
 from backend.core.auth import id_generator, verify_token_depends
@@ -72,13 +73,15 @@ async def get_posts(
         Depends(db_helper.session_getter)
     ],
     start: Annotated[int,Field(gt=-1)],
-    amount: Annotated[int,Field(gt=0, lt=101)]
+    amount: Annotated[int,Field(gt=0, lt=101)],
+    sort_by: Annotated[str,PostSortByOptions] = "new"
 ):
     """Returns <amount> of posts, starting from <start>"""
     posts = await PostCrud.get_posts(
         start=start,
         amount=amount,
-        session=session
+        session=session,
+        sort_by=sort_by
     )
 
     return posts
@@ -95,4 +98,28 @@ async def submit_post(
     post_id = str(next(id_generator))
     await redis_scripts.add_post(post_id, post)
     return post_id 
- 
+
+@router.put("/like_post")
+async def like_post(
+    session: Annotated[
+        AsyncSession,
+        Depends(db_helper.session_getter)
+    ],
+    post_id: int,
+    action: Annotated[str, PostLikeAction] = "plus"
+):
+    await PostCrud.like(session,post_id=post_id,action=action)
+    return await PostCrud.get_likes(session,post_id=post_id)
+
+
+@router.put("/dislike_post")
+async def dislike_post(
+    session: Annotated[
+        AsyncSession,
+        Depends(db_helper.session_getter)
+    ],
+    post_id: int,
+    action: Annotated[str, PostLikeAction] = "plus"
+):
+    await PostCrud.dislike(session,post_id=post_id,action=action)
+    return await PostCrud.get_dislikes(session,post_id=post_id)

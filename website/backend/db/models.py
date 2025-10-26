@@ -5,7 +5,7 @@
 from sqlalchemy import (
 	Column, Integer,Text,
     String,DateTime, func,
-    ForeignKey
+    ForeignKey, CheckConstraint
 )
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase 
@@ -22,6 +22,13 @@ class Post(Base):
     title = Column(String(MAX_TITLE_LEN), nullable=False)
     text = Column(String(MAX_TEXT_LEN), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    likes = Column(Integer, default=0)
+    dislikes = Column(Integer, default=0)
+
+    __table_args__ = (
+        CheckConstraint(likes >= 0, name='check_positive_value'),
+        CheckConstraint(dislikes >= 0, name='check_positive_value'),
+    )
 
 class Comment(Base):
     __tablename__ = "comments"

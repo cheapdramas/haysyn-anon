@@ -17,4 +17,5 @@ ADMINS = get_from_env("ADMINS").split(',')
 DATABASE_URL = get_from_env("DATABASE_URL")
 REDIS_CHANNEL_NAME = "posts"
 TELEGRAM_BOT_TOKEN = get_from_env("TELEGRAM_BOT_TOKEN")
-WEBSITE_URL_API = get_from_env("WEBSITE_URL_API")
+WEBSITE_URL_BASE = get_from_env("WEBSITE_URL_BASE")
+API_VERSION = get_from_env("API_VERSION")

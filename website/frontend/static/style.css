@@ -1,4 +1,4 @@
-* {
+* {style.css
 	box-sizing: border-box;
   }
   
@@ -11,6 +11,8 @@
 
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: auto;
+		
+
   }
   
   body {
@@ -35,6 +37,17 @@
   color: inherit;
   font-weight: bold;
 }
+.hidden {
+  display: none !important;
+}
+#comments-title {
+  text-align: center;
+  font-family: "Dancing Script", cursive;
+  font-size: 2rem;
+  margin: 2rem 0 1rem;
+  color: #222;
+  opacity: 0.85;
+}
   
   #feed {
 	padding: 1rem;
@@ -52,7 +65,7 @@
 	display: none;
 	align-items: center;
 	justify-content: center;
-	z-index: 999;
+	z-index: 10000;
   }
   
   #modal {
@@ -68,6 +81,7 @@
 	flex-direction: column;
 	gap: 1rem;
 	transition: height 0.2s ease;
+	z-index:10001;
   }
   
   #modal input[type="text"],
@@ -104,28 +118,6 @@
 	box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
   
-footer {
-	position: fixed;
-	bottom: 0; left: 0; right: 0;
-	padding: 0.75rem;
-	display: flex;
-	gap: 0.5rem;
-	background: white;
-	border-top: 1px solid #ddd;
-	box-shadow: 0 -2px 6px rgba(0,0,0,0.03);
-	z-index: 100;
-  }
-  
-  footer textarea {
-	flex: 1;
-	padding: 0.6rem 0.8rem;
-	font-size: 1rem;
-	border-radius: 10px;
-	border: 1px solid #ccc;
-	resize: none;
-	height: 2.5rem;
-	line-height: 1.2rem;
-  }
 
 .btn-group {
   display: flex;
@@ -142,7 +134,6 @@ footer {
 /* если хочешь более округлённую/плоскую кнопку на мобильных */
 @media (max-width: 480px) {
   .icon-btn { flex: 0 0 48px; border-radius: 10px; }
-  #footer-panel textarea { height: 2.6rem; }
 }
 	align-items: stretch;
 }
@@ -184,34 +175,6 @@ footer {
   #footer-panel textarea { height: 2.6rem; }
 }
 
-/* --- Футер: растянуть кнопки по высоте --- */
-#footer-panel {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 0.4rem;
-  display: flex;
-  gap: 0.5rem;
-  background: white;
-  border-top: 1px solid #ddd;
-  box-shadow: 0 -2px 6px rgba(0,0,0,0.03);
-  align-items: stretch; /* ВАЖНО: чтобы дети растягивались по высоте */
-  z-index: 100;
-}
-
-#footer-panel textarea {
-  flex: 1 1 auto;
-  padding: 0.6rem 0.8rem;
-  font-size: 1rem;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  resize: none;
-  height: 2.8rem;          /* базовая высота */
-  line-height: 1.2rem;
-  align-self: center;      /* если надо центрировать текстовую область */
-}
-
 
 
 
@@ -236,9 +199,8 @@ footer {
 }
 
 
-
   
-  .post {
+.post {
 	background: white;
 	padding: 1rem;
 	border-radius: 12px;
@@ -246,16 +208,38 @@ footer {
 	border: 1px solid #e5e7eb;
 	transition: background 0.2s;
 	word-break: break-word;
-  }
+	position: relative;
+	padding-bottom: 2.5rem;
+}
   
-  .preview-text {
+.preview-text {
 	opacity: 0.8;
-  }
+}
   
-  .post:hover {
+.post:hover {
 	background: #fafafa;
-  }
+}
   
+
+.post-likes {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 0.3rem 0.6rem;
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #555;
+  align-items: center;
+}
+
+
+
+
+
+
   .blurred {
 	filter: blur(4px);
 	pointer-events: none;
@@ -387,4 +371,184 @@ footer {
 @keyframes popin {
   from { transform: scale(0.9); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
+}
+
+/* === DOCK === */
+.dock {
+  position: fixed;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  background: rgba(60, 60, 60, 0.2);
+  border-radius: 25px;
+  padding: 12px 20px;
+  backdrop-filter: blur(18px) saturate(180%) contrast(120%);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+  z-index: 9999;
+  transition: transform 0.3s ease, bottom 0.3s ease;
+}
+
+.dock.active {
+  bottom: 45vh; /* піднімаємо панель до рівня клави */
+	transition: bottom 0.15s ease;
+}
+
+.dock::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 0% 50%, rgba(255,255,255,0.15), transparent 60%),
+              radial-gradient(circle at 100% 50%, rgba(255,255,255,0.1), transparent 60%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* === BUTTONS === */
+.dock-btn {
+	color: #555;
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.25s ease;
+	-webkit-appearance: none;
+}
+.dock-btn svg path {
+  stroke: currentColor;
+  stroke-width: 2.5; /* толще, чем раньше */
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dock-btn--wide {
+  width: 80px; /* шире остальных */
+}
+
+.dock-btn--extrawide {
+  flex-grow: 1;
+  min-width: 120px;
+  margin-right: 10px; 
+  justify-content: center;
+}
+
+.dock-btn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.dock-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: black;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.dock-btn:hover svg {
+  opacity: 1;
+}
+
+
+.comment-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1em;
+  opacity: 0.7;
+  transition: 0.2s;
+}
+.comment-btn:hover {
+  opacity: 1;
+}
+
+.comment-input-panel {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 16px;
+  padding: 12px;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.comment-input-panel textarea {
+  width: 100%;
+  resize: none;
+  font-size: 15px;
+  line-height: 1.4;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+  background: rgba(255,255,255,0.07);
+  color: white;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.comment-actions button {
+  background: rgba(255,255,255,0.08);
+  border: none;
+  border-radius: 12px;
+  padding: 8px 14px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.comment-actions button:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+#comment-text {
+  resize: none;
+  width: 100%;
+  padding: 8px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+#send-comment-btn {
+  align-self: flex-end;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #0077ff;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
+}
+#send-comment-btn:hover {
+  background: #005fe0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }

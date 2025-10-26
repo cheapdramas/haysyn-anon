@@ -1,0 +1,261 @@
+.comment-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1em;
+  opacity: 0.7;
+  transition: 0.2s;
+}
+.comment-btn:hover {
+  opacity: 1;
+}
+
+
+#comment-input-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  z-index: 9999; /* поверх всього */
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  max-height: 60vh; /* максимум росту віджета */
+  overflow: hidden;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+#comment-input-panel.active {
+  display: flex;
+}
+
+#comment-text {
+  width: 100%;
+  min-height: 40px;
+  max-height: 50vh;
+  overflow-y: auto;
+  resize: none;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  background: rgba(255,255,255,0.95);
+}
+
+#send-comment-btn {
+  align-self: flex-end;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: none;
+  background: #0077ff;
+  color: white;
+  cursor: pointer;
+}#send-comment-btn:hover {
+  background: #005fe0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+textarea {
+  color: black !important;
+  background: white !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+}
+.comment-form textarea {
+  width: 100%;
+  font-size: 16px;
+  border-radius: 16px;
+  padding: 10px 14px;
+  resize: none; /* ⛔ не можна вручну тягнути */
+  overflow: hidden; /* ⛔ ніяких скролів */
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: white;
+  backdrop-filter: blur(8px);
+}
+
+.comment-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.comment-actions button {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  padding: 6px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: white;
+  transition: 0.2s;
+}
+
+.comment-actions button:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+#send-comment-btn {
+  background: #007bff;
+  color: white;
+}
+
+#cancel-comment-btn {
+  background: #ccc;
+  color: black;
+}
+
+
+/* Анімація для нового коментаря */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.new-comment {
+  animation: fadeIn 0.5s ease-out;
+}
+
+
+.comment-header {
+	display: flex;
+	align-items: center;
+	margin-bottom: 3px;
+}
+
+
+.comment-input {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  width: 100%;
+}
+
+
+.comment-input textarea {
+	font-size: 16px
+  flex-grow: 1;
+  max-height: 180px;
+  min-height: 50px;
+  height: 50px;
+  resize: none;
+  overflow-y: auto;
+  background: rgba(255,255,255,0.8);
+  border: none;
+  border-radius: 16px;
+  padding: 10px;
+  font-size: 15px;
+  color: #000;
+  transition: height 0.2s ease;
+}
+
+.comment-input textarea:focus {
+  outline: none;
+}
+
+.send-btn {
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  transition: background 0.2s;
+}
+
+.send-btn:hover {
+  background: #eee;
+}
+
+
+.hidden {
+  display: none !important;
+}
+
+.dock-comment {
+	isolation: isolate;
+	padding: 5px;
+	background: rgba(60,60,60,0.5);
+	flex-direction: column;
+	align-items: center;
+}
+
+
+.close {
+	margin-right: 5px;
+	background: white;
+	color: black;
+}
+
+.send {
+	background: rgba(60,60,60,0.5);
+	border:none;
+  border-radius: 18px;
+}
+
+
+
+
+
+/**/
+#commentInput {
+  border-radius: 15px;
+  padding: 10px;
+  font-size: 16px;
+  width: 95%; /* ← ось головне: розтягуємо майже на всю панель */
+  max-height: 180px;
+  overflow-y: hidden;
+  resize: none;
+  box-sizing: border-box;
+}
+/**/
+/**/
+#dock-comment-btn-holder {
+	width:100%;
+  display: flex;
+	justify-content: flex-end;
+}
+
+/* .mobile-dock .send-btn:active { */
+/*   background: #005fcc; */
+/* } */
+
+/* показуємо тільки на мобілках */
+@media (min-width: 768px) {
+  #mobile-dock {
+    display: none;
+  }
+}
+
+
+.comment-avatar {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	margin-right: 10px;
+	object-fit: cover;
+}
