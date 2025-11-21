@@ -18,7 +18,7 @@ from typing import Sequence
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import func, update
+from sqlalchemy import func, update, case
 
 class PostCrud:
     @staticmethod
@@ -52,11 +52,10 @@ class PostCrud:
     @staticmethod
     async def get_posts(
         session: AsyncSession,
-        sort_by: PostSortByOptions,
+        sort_by: str,
         amount: int,
         start: int = 0,
     ) -> Sequence[PostRead]:
-        #select the latest <amount> of posts from <start> with limited text to 200 characters
         query = select(
             Post.id,
             Post.title,
@@ -64,11 +63,36 @@ class PostCrud:
             Post.dislikes,
             func.substr(Post.text, 1, 200).label("text")
         )
+
+        if sort_by == "old":
+            query = query.offset(start).limit(amount)
+
         if sort_by == "new":
             query = query.order_by(Post.id.desc()).offset(start).limit(amount)
 
         if sort_by == "likes":
-            query = query.order_by(Post.likes.desc()).offset(start).limit(amount)
+            order_expr = case(
+                (Post.likes == 0, 0),   
+                else_=1                
+            ).desc()
+
+            query = query.order_by(
+                order_expr,
+                Post.likes.desc(),
+                Post.id.desc()
+            ).offset(start).limit(amount)
+
+        if sort_by == "dislikes":
+            order_expr = case(
+                (Post.dislikes== 0, 0),   
+                else_=1                
+            ).desc()
+
+            query = query.order_by(
+                order_expr,
+                Post.dislikes.desc(),
+                Post.id.desc()
+            ).offset(start).limit(amount)
 
 
         result = await session.execute(query)

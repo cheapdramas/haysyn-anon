@@ -2,7 +2,7 @@ import aiohttp
 from core.config import WEBSITE_URL_BASE, API_VERSION
 from core.auth import create_jwt
 
-async def send_approved_post(post_id: str) -> bool:
+async def send_approved_post(post_id: str) -> any:
     token = create_jwt()
     url = f"{WEBSITE_URL_BASE}{API_VERSION}post?post_id={post_id}" 
     headers = {
@@ -14,7 +14,7 @@ async def send_approved_post(post_id: str) -> bool:
         async with aiohttp.ClientSession() as session:
             resp = await session.post(url, headers=headers)
             if resp.status == 200:
-                return True
-        return False
+                return await resp.json()
+        return None 
     except Exception:
-        return False
+        return None 

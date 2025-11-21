@@ -3,7 +3,7 @@
 case "$1" in
     web)
         cd website
-        source $(poetry env info -p)/bin/activate
+				source $(poetry env info -p)/bin/activate
         uvicorn backend.main:app --host 0.0.0.0
         ;;
     tg)

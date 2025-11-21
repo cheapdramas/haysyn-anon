@@ -2,7 +2,7 @@ from aiogram import Bot
 from core.Redis.scripts import get_unprocessed_posts_data, remove_unprocessed_post
 from core.config import ADMINS
 from core.messages import mod_message
-from db.mod_messages_crud import ModMessagesCrud
+from db.crud import ModMessagesCrud
 from keyboards.inline import keyboard_mod
 
 async def send_unprocessed_posts(bot: Bot):

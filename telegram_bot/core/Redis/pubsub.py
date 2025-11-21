@@ -3,7 +3,7 @@ from core.Redis.scripts import get_post, remove_unprocessed_post
 from core.config import REDIS_CHANNEL_NAME, ADMINS
 from core.messages import mod_message
 from keyboards.inline import keyboard_mod
-from db.mod_messages_crud import ModMessagesCrud
+from db.crud import ModMessagesCrud
 
 
 
@@ -27,17 +27,20 @@ async def listen_to_redis(bot):
                 keyboard = keyboard_mod(post_id)
 
                 for admin_id in ADMINS:
-                    msg_sent = await bot.send_message(
-                        text=msg,
-                        chat_id=admin_id,
-                        reply_markup=keyboard,
-                        parse_mode="HTML"
-                    )
-                    await ModMessagesCrud.add(
-                        message_id=msg_sent.message_id,
-                        admin_id=admin_id,
-                        post_id=post_id
-                    )
+                    try:
+                        msg_sent = await bot.send_message(
+                            text=msg,
+                            chat_id=admin_id,
+                            reply_markup=keyboard,
+                            parse_mode="HTML"
+                        )
+                        await ModMessagesCrud.add(
+                            message_id=msg_sent.message_id,
+                            admin_id=admin_id,
+                            post_id=post_id
+                        )
+                    except:
+                        print(f"Failed to send mod message to admin {admin_id}")
                 # remove post_id from unprocessed_posts
                 await remove_unprocessed_post("post:" + post_id)
     except Exception as e:

@@ -4,9 +4,11 @@ if ("scrollRestoration" in history) {
   history.scrollRestoration = "auto";
 }
 
+console.log(window.Telegram.WebApp.initData)
 
+const selectSortBy = document.getElementById("selectSortBy")
 
-
+console.log(sessionStorage)
 
 // позначаємо reload
 window.addEventListener("beforeunload", () => {
@@ -19,8 +21,11 @@ window.addEventListener("DOMContentLoaded", () => {
   if (wasReloaded === "1") {
     sessionStorage.removeItem("was_reloaded");
     window.scrollTo(0, 0); // тепер точно зверху
+		selectSortBy.value = "likes"
   }
 });
+
+
 // --- Конфіг ---
 const POSTS_PER_PAGE = 50;
 const CACHE_KEY = "cachedPosts";
@@ -66,7 +71,7 @@ function renderPosts(posts, replace = false) {
     const div = document.createElement("div");
     div.className = "post";
 		let last_post = feed.lastChild;
-		div.setAttribute("index", last_post == null ? 0 : parseInt(last_post.getAttribute("index")) + 1);
+		div.setAttribute("index", last_post == null ? 1 : parseInt(last_post.getAttribute("index")) + 1);
 
     const previewText =
       post.text.length === 200 ? post.text + "..." : post.text;
@@ -92,7 +97,7 @@ function renderPosts(posts, replace = false) {
 }
 
 
-async function loadFeedChunk() {
+async function loadFeedChunk(sort_by="likes") {
 
 	if (loading || noMorePosts) return;
   loading = true;
@@ -107,7 +112,7 @@ async function loadFeedChunk() {
 			last_post_index = last_post.getAttribute("index");
 		}
     console.log(last_post_index);
-		const res = await fetch(`/api/api_v1/posts?start=${last_post_index}&amount=${POSTS_PER_PAGE}`);
+		const res = await fetch(`/api/api_v1/posts?start=${last_post_index}&amount=${POSTS_PER_PAGE}&sort_by=${sort_by}`);
 		posts = await res.json();
 
 		if (posts.length === 0) {
@@ -166,7 +171,15 @@ async function submitPost() {
   if (!title || !text) return;
 
   try {
-    const res = await fetch("/api/api_v1/submit_post", {
+		let url = "/api/api_v1/submit_post";
+		const tg = window.Telegram.WebApp;
+		let userId = tg.initDataUnsafe?.user?.id;
+
+		if (userId !== undefined) {
+			url += `?telegram_user_id=${userId}`;
+		}
+		
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, text }),
@@ -270,11 +283,7 @@ document.getElementById("postTitle").addEventListener("input", function () {
 });
 
 //
-window.addEventListener("scroll", () => {
-  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
-    loadFeedChunk();
-  }
-});
+
 //
 document.getElementById("add").addEventListener("click", () => {
   openModal();
@@ -298,20 +307,27 @@ document.getElementById("down").addEventListener("click", () => {
 });
 
 document.getElementById("home").addEventListener("click", () => {
-  start = 0;
-  noMorePosts = false;
-  document.getElementById("feed").innerHTML = "";
-	 if (!loadFromCache()) {
-	 	loadFeedChunk().then((posts) => {;
-	 		if (posts != null) {
-	 			saveToCache(posts,start);
-	 		}
-	 	});
-	 }
-  window.scrollTo({ top: 0, behavior: "smooth" });
+	window.location.href = `${window.location.origin}/`;
 });
 
 
+selectSortBy.onchange = function() {
+  start = 0;
+  noMorePosts = false;
+  document.getElementById("feed").innerHTML = "";
+	const selectedValue = selectSortBy.value;
+
+	loadFeedChunk(selectedValue);
+	window.localStorage.clear();
+	window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+window.addEventListener("scroll", () => {
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+		const selectedValue = selectSortBy.value;
+    loadFeedChunk(selectedValue);
+  }
+});
 
 
 
@@ -322,3 +338,4 @@ if (!loadFromCache()) {
 		}
 	});
 }
+

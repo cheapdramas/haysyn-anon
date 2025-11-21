@@ -1,6 +1,16 @@
 <header>
-	<a href="{{ '/' if not is_homepage else '/contacts'}}" 
-	   style="text-decoration: none; color: inherit; font-weight: bold;">
-	  Haysyn Anon
-	</a>
+	<div class = "header-elements-holder">
+		<a href="{{ '/' if not is_homepage else '/contacts'}}" 
+			 style="text-decoration: none; color: inherit; font-weight: bold;">
+			Haysyn Anon
+		</a>
+		{%if is_homepage %}
+			<select id = "selectSortBy">
+				<option value = "new">Нові</option>
+				<option value = "likes">К-сть лайків</option>
+				<option value = "dislikes">К-сть дізлайків</option>
+				<option value = "old">Старі</option>
+			</select>
+		{%endif%}
+	</div>
 </header>

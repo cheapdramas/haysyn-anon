@@ -18,8 +18,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.db.crud import PostCrud 
 from backend.schemas.post import (
 	PostBase,
+	PostCreate,
 	PostLikeAction,
 	PostRead,
+	PostCreated,
     PostSortByOptions
 )
 from backend.db.utils import db_helper
@@ -32,7 +34,7 @@ import backend.core.Redis.scripts as redis_scripts
 
 router = APIRouter()
 
-@router.post("/post", response_model=PostRead)
+@router.post("/post", response_model=PostCreated)
 @fall_free()
 async def create_post(
     post_id: str,
@@ -46,9 +48,17 @@ async def create_post(
     Takes post data from Redis by post_id
     Token must be released from bot
     """
+    
 
-    post_data = await redis_scripts.remove_post(post_id) 
+    post_data:dict = await redis_scripts.remove_post(post_id) 
+    telegram_user_id = post_data.pop("telegram_user_id", None)
     post_model = await PostCrud.create_post(post_data, session)
+
+    # Assemble a valid response
+    post_model = PostCreated(
+        **post_model.__dict__,
+        telegram_user_id=telegram_user_id
+    )
     return post_model
 
 @router.get("/post",response_model=PostRead)
@@ -74,14 +84,14 @@ async def get_posts(
     ],
     start: Annotated[int,Field(gt=-1)],
     amount: Annotated[int,Field(gt=0, lt=101)],
-    sort_by: Annotated[str,PostSortByOptions] = "new"
+    sort_by: PostSortByOptions
 ):
     """Returns <amount> of posts, starting from <start>"""
     posts = await PostCrud.get_posts(
         start=start,
         amount=amount,
         session=session,
-        sort_by=sort_by
+        sort_by=sort_by.value
     )
 
     return posts
@@ -90,13 +100,14 @@ async def get_posts(
 @router.post("/submit_post")
 @fall_free()
 async def submit_post(
-    post: PostBase
+    post: PostBase,
+    telegram_user_id: str | None = None,
 ):
     """Put's post in Redis
     Redis then sends post_id to channel
     """
     post_id = str(next(id_generator))
-    await redis_scripts.add_post(post_id, post)
+    await redis_scripts.add_post(post_id, post, telegram_user_id)
     return post_id 
 
 @router.put("/like_post")

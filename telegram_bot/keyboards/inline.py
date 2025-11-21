@@ -10,15 +10,20 @@ def keyboard_mod(post_id: str) -> InlineKeyboardMarkup:
 
     return keyboard
 
-
-def keyboard_webapp()  -> InlineKeyboardMarkup:
-    web_button = InlineKeyboardButton(
-        text="Anon",
-        web_app=WebAppInfo(url="https://extracapsular-earline-perspectiveless.ngrok-free.dev/")
+def keyboard_link(url: str,text:str="Link") -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=text, url=url)],
+        ]
     )
 
+    return keyboard
+
+def keyboard_webapp(url: str,text:str="Link") -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[[web_button]]  # одна кнопка в одной строке
+        inline_keyboard=[
+            [InlineKeyboardButton(text=text, web_app=WebAppInfo(url=url))],
+        ]
     )
 
     return keyboard

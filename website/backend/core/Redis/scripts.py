@@ -3,11 +3,17 @@ from backend.core.Redis.client import get_redis
 from backend.core.config import REDIS_CHANNEL_NAME
 
 
-async def add_post(post_id, payload: PostCreate) -> str:
+async def add_post(post_id, payload: PostCreate, telegram_user_id:str | None = None) -> str:
     r = await get_redis()
     post_key = "post:" + post_id
+    
+    #add to payload telegram_user_id
+    payload_dict: dict = payload.model_dump()
+    if telegram_user_id:
+        payload_dict["telegram_user_id"] = telegram_user_id
+
     #add new post to redis
-    await r.hset(post_key, mapping=payload.model_dump())
+    await r.hset(post_key, mapping=payload_dict)
 
     #add new post to UNPROCESSED posts
     #   (if tg bot is alive and listening to channel, 

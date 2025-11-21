@@ -18,6 +18,9 @@ class PostRead(PostBase):
     likes: int 
     dislikes: int
 
+class PostCreated(PostRead):
+    telegram_user_id: str | None = None
+
 class PostInRedis(PostBase):
 	id: str 
 

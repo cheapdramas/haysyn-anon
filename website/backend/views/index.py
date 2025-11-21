@@ -6,7 +6,7 @@ router = APIRouter()
 
 @router.get("/",name="home")
 async def index(request: Request):
-	return templates.TemplateResponse("index.html", {
-		"request": request,
-		"is_homepage": True
-	})
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "is_homepage": True
+    })

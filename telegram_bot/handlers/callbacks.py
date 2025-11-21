@@ -1,8 +1,10 @@
 from aiogram import Router, Bot 
 from aiogram.types import CallbackQuery
-from db.mod_messages_crud import ModMessagesCrud 
+from db.crud import ModMessagesCrud, ChanellMessagesCrud
 from core.api_communication import send_approved_post
 from core.Redis.scripts import remove_post as redis_remove_post
+from core.config import CHANNEL_NAME, WEBSITE_URL_BASE
+from keyboards.inline import keyboard_link
 
 router = Router()
 
@@ -10,20 +12,39 @@ router = Router()
 async def approve_handler(callback: CallbackQuery, bot: Bot):
     post_id = callback.data.split(":")[1]
 
-    is_sent_to_api = await send_approved_post(post_id)
+    api_answer = await send_approved_post(post_id)
 
-    if is_sent_to_api == True:
+    if api_answer:
 
         messages_that_waits_for_mod = await ModMessagesCrud.get(post_id)
         
         #delete messages with this post_id approve in admins chat
         for msg in messages_that_waits_for_mod:
-            print(msg)
             await bot.delete_message(chat_id=msg.admin_id, message_id=msg.message_id)
         #delete this messages from database
         await ModMessagesCrud.delete(post_id)
 
         await callback.answer(f"Approved ✅")
+
+        #send post to telegram channel
+        post_url = f"{WEBSITE_URL_BASE}post/{api_answer['id']}"
+        channel_message = await bot.send_message(
+            chat_id=CHANNEL_NAME,
+            text=callback.message.text, 
+            entities=callback.message.entities,
+            reply_markup=keyboard_link(text="Посилання на пост", url=post_url)
+        )
+
+        if telegram_user_id := api_answer.get("telegram_user_id"):
+            await ChanellMessagesCrud.add(
+                user_id=telegram_user_id,
+                message_id=str(channel_message.message_id)
+            )
+
+
+
+
+
         print(f"Approved post: {post_id}")
     else:
         await callback.answer(f"Connection with API failed 😔")

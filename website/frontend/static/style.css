@@ -32,6 +32,19 @@
 	z-index: 10;
   }
 
+	.header-elements-holder {
+		display: flex;
+		flex-direction: column;
+		margin:0;
+		column-gap:0;
+		padding:0;
+	}
+
+	select {
+		align-self: flex-end;
+		margin-bottom:0;
+	}
+
   #logo-link {
   text-decoration: none;
   color: inherit;

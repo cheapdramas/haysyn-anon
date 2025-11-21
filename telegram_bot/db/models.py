@@ -13,3 +13,8 @@ class ModMessages(Base):
     post_id = Column(String,primary_key=True)
     admin_id = Column(String, primary_key=True)
     message_id = Column(Integer, nullable=False)
+
+class ChanellMessages(Base):
+    __tablename__ = "channel_messages"
+    user_id = Column(String)
+    message_id = Column(Integer, nullable=False,primary_key=True)

@@ -9,6 +9,7 @@ from backend.api import router as api_router
 from backend.db.utils import db_helper 
 import backend.core.Redis.client as redis_client 
 from backend.core.config import STATIC_FILES_PATH
+
 import uvicorn
 
 @asynccontextmanager
