@@ -15,7 +15,7 @@ from backend.schemas.comment import (
 from fastapi import HTTPException,status
 
 from typing import Sequence
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, query
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import func, update, case
@@ -48,6 +48,17 @@ class PostCrud:
         session: AsyncSession
     ) -> Post | None:
         return await session.get(Post, id)
+
+    @staticmethod
+    async def get_posts_tg_user_id(
+        telegram_user_id: str,
+        session: AsyncSession
+    ) -> Sequence[Post]:
+        query = select(Post).filter(Post.telegram_user_id==telegram_user_id)
+        result = await session.execute(query)
+        posts = result.scalars().all()
+        return posts
+
         
     @staticmethod
     async def get_posts(
@@ -63,6 +74,7 @@ class PostCrud:
             Post.dislikes,
             func.substr(Post.text, 1, 200).label("text")
         )
+
 
         if sort_by == "old":
             query = query.offset(start).limit(amount)
@@ -93,6 +105,8 @@ class PostCrud:
                 Post.dislikes.desc(),
                 Post.id.desc()
             ).offset(start).limit(amount)
+
+        
 
 
         result = await session.execute(query)

@@ -11,3 +11,4 @@ snapshots/
 .venv
 .env
 
+telegram_bot/TODO.txt

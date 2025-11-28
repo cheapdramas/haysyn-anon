@@ -1,5 +1,5 @@
 from pydantic import BaseModel, StringConstraints
-from typing import Annotated 
+from typing import Annotated, Any 
 from dataclasses import dataclass
 from enum import Enum
 
@@ -11,15 +11,12 @@ class PostBase(BaseModel):
 	text: Annotated[str, StringConstraints(max_length=MAX_TEXT_LEN)]
 
 class PostCreate(PostBase):
-    pass
+    telegram_user_id: str | None = None
 
-class PostRead(PostBase):
+class PostRead(PostCreate):
     id: int
     likes: int 
     dislikes: int
-
-class PostCreated(PostRead):
-    telegram_user_id: str | None = None
 
 class PostInRedis(PostBase):
 	id: str 

@@ -1,11 +1,12 @@
 import redis.asyncio as redis
+from core.config import REDIS_HOST, REDIS_PORT
 
 r: redis.Redis | None = None
 
 async def init_redis() -> redis.Redis:
     global r
     if r is None:
-        r = redis.Redis(host="localhost", port=6379, decode_responses=True)
+        r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
     return r
 
 def get_redis() -> redis.Redis:

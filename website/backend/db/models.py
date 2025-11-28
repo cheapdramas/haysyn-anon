@@ -24,6 +24,7 @@ class Post(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     likes = Column(Integer, default=0)
     dislikes = Column(Integer, default=0)
+    telegram_user_id = Column(String(64), nullable=True)
 
     __table_args__ = (
         CheckConstraint(likes >= 0, name='check_positive_value'),

@@ -21,4 +21,5 @@ DATABASE_URL = get_from_env("DATABASE_URL")
 REDIS_CHANNEL_NAME = "posts"
 KEY = get_from_env("KEY")
 ADMINS = get_from_env("ADMINS").split(',')
+SECRET_SALT = get_from_env("SECRET_SALT")
 

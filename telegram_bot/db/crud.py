@@ -59,12 +59,14 @@ class ModMessagesCrud:
 class ChanellMessagesCrud:
     @staticmethod
     async def add(
+        post_id: str,
         user_id: str,
         message_id: str
     ) -> ChanellMessages:
         try:
             async with db_helper.session_factory() as session:
                 message_info = ChanellMessages(
+                    post_id=post_id,
                     user_id=user_id,
                     message_id=message_id
                 )
@@ -77,15 +79,26 @@ class ChanellMessagesCrud:
 
     @staticmethod
     async def get(
-        user_id: str,
-        start: int = 0,
-        amount: int = 20
+        user_id: str | None = None,
+        post_id: str | None = None,
+        start: int | None = 0,
+        amount: int | None = 10 
     ) -> Sequence[ChanellMessages]:
         try:
             async with db_helper.session_factory() as session:
-                q = select(ChanellMessages).filter(ChanellMessages.user_id==user_id).offset(start).limit(amount)
+                
+                
+                q = select(ChanellMessages)
+                if post_id:
+                    q = q.filter(ChanellMessages.post_id==post_id)
+                if user_id:
+                    q = q.filter(ChanellMessages.user_id==user_id)
+
+                if start and amount:
+                    q = q.offset(start).limit(amount)
+
                 result = await session.execute(q)
-                return result.scalars().all()        
+                return result.scalars().all()      
         except Exception as e:
             print("Error occured! ChanellMessages.add : ",str(e))
 

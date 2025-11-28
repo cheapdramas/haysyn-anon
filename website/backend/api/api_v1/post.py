@@ -21,12 +21,12 @@ from backend.schemas.post import (
 	PostCreate,
 	PostLikeAction,
 	PostRead,
-	PostCreated,
     PostSortByOptions
 )
 from backend.db.utils import db_helper
 from backend.core.auth import id_generator, verify_token_depends
 from backend.core.utils import fall_free
+from backend.db.models import Post
 
 import backend.core.Redis.scripts as redis_scripts
 
@@ -34,7 +34,7 @@ import backend.core.Redis.scripts as redis_scripts
 
 router = APIRouter()
 
-@router.post("/post", response_model=PostCreated)
+@router.post("/post", response_model=PostRead)
 @fall_free()
 async def create_post(
     post_id: str,
@@ -50,16 +50,10 @@ async def create_post(
     """
     
 
-    post_data:dict = await redis_scripts.remove_post(post_id) 
-    telegram_user_id = post_data.pop("telegram_user_id", None)
-    post_model = await PostCrud.create_post(post_data, session)
+    post_data: dict = await redis_scripts.remove_post(post_id) 
+    created_post: Post  = await PostCrud.create_post(post_data, session)
 
-    # Assemble a valid response
-    post_model = PostCreated(
-        **post_model.__dict__,
-        telegram_user_id=telegram_user_id
-    )
-    return post_model
+    return created_post 
 
 @router.get("/post",response_model=PostRead)
 @fall_free()
@@ -84,31 +78,46 @@ async def get_posts(
     ],
     start: Annotated[int,Field(gt=-1)],
     amount: Annotated[int,Field(gt=0, lt=101)],
-    sort_by: PostSortByOptions
+    sort_by: PostSortByOptions,
 ):
     """Returns <amount> of posts, starting from <start>"""
     posts = await PostCrud.get_posts(
         start=start,
         amount=amount,
         session=session,
-        sort_by=sort_by.value
+        sort_by=sort_by.value,
     )
 
     return posts
 
+@router.get("/posts_by_tg_user_id",response_model=List[PostRead])
+@fall_free()
+async def get_posts(
+    session: Annotated[
+        AsyncSession,
+        Depends(db_helper.session_getter)
+    ],
+    telegram_user_id: str
+):
+    posts = await PostCrud.get_posts_tg_user_id(
+        telegram_user_id,
+        session,
+    )
+
+    return posts
 
 @router.post("/submit_post")
 @fall_free()
 async def submit_post(
-    post: PostBase,
-    telegram_user_id: str | None = None,
+    post: PostCreate 
 ):
-    """Put's post in Redis
+    """Puts post in Redis
     Redis then sends post_id to channel
     """
     post_id = str(next(id_generator))
-    await redis_scripts.add_post(post_id, post, telegram_user_id)
-    return post_id 
+    print("/submit_post telegram_user_id: ",post.telegram_user_id)
+    await redis_scripts.add_post(post_id, post)
+    return f"post key redis: 'post:{post_id}'"
 
 @router.put("/like_post")
 async def like_post(
@@ -120,8 +129,11 @@ async def like_post(
     action: Annotated[str, PostLikeAction] = "plus"
 ):
     await PostCrud.like(session,post_id=post_id,action=action)
-    return await PostCrud.get_likes(session,post_id=post_id)
-
+    likes = await PostCrud.get_likes(session,post_id=post_id)
+    if likes == 5:
+        await redis_scripts.publish_post_in_channel("to_tg_channel", post_id)
+    return likes
+            
 
 @router.put("/dislike_post")
 async def dislike_post(

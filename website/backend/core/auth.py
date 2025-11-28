@@ -1,13 +1,11 @@
 import jwt
 import snowflake
-from backend.core.config import KEY
+from backend.core.config import KEY, SECRET_SALT
 from datetime import datetime, timedelta, timezone
-
+from hashlib import sha256
 from typing import Awaitable, Callable
-
 from fastapi import HTTPException, status, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
 from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError
 
 
@@ -62,4 +60,7 @@ def verify_token_depends(sub: str) -> Callable[[HTTPAuthorizationCredentials], A
         return token
 
     return check_token
+
+def anonymize_user_id(telegram_user_id: str):
+    return sha256(f"{telegram_user_id}{SECRET_SALT}".encode()).hexdigest()
 

@@ -25,7 +25,7 @@ from colorama import Fore, Back, Style, init
 import os
 import asyncio
 
-text_sizes = {"small" : 50, "big": 2000}
+text_sizes = {"small" : 50, "big": 1000}
 fake = Faker()
 
 # Automatically reset color after each print statement
@@ -35,7 +35,7 @@ init(autoreset=True)
 def clear_term():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-async def createPostRedis(text_size: str, amount: int = 1) -> bool:
+async def createPostRedis(text_size: str, amount: int = 1, tg_user_id:str | None = None) -> bool:
     if not isinstance(text_size, str) or not isinstance(amount, int):
         return False
     size_text:int | None = text_sizes.get(text_size)
@@ -51,7 +51,7 @@ async def createPostRedis(text_size: str, amount: int = 1) -> bool:
         post = PostCreate(title="Title", text=fake.text(max_nb_chars=size_text))
         try:
             post_id = str(next(id_generator))
-            await redis_scripts.add_post(post_id, post)
+            await redis_scripts.add_post(post_id, post, tg_user_id)
             print(Fore.GREEN + f"Post {post_id} created in redis✅")
         except Exception as e:
             print(Fore.RED + f"❌ Post creation failed! Exception: \n {str(e)}")
@@ -96,11 +96,16 @@ async def getRedisPosts():
         print(f"Post '{i}':  ", post_data)
 
 
-async def getRedisPostsUnprocessed():
+async def getRedisPostsUnprocessed(show_data: bool = False):
     r = await redis_client.get_redis()
     unproc_post_keys = await r.smembers("unprocessed_posts")
+
     for i in unproc_post_keys:
-        print(Fore.YELLOW + f" Unprocessed post: {i}")
+        if show_data: 
+            print(Fore.YELLOW + f"Unproccessed post data: {await r.hgetall(i)}")
+        else:
+            print(Fore.YELLOW + f" Unprocessed post: {i}")
+
     print(Fore.BLUE + f"Total unprocessed_posts: {len(unproc_post_keys)}")
 
 
@@ -142,16 +147,20 @@ async def parse_user_input(tokens: list[str]) -> bool:
 
         case "createPost":
             if len(tokens) < 3:
-                print(Fore.RED + "Incorrect usage of 'createPost' command \n 'createPost <amount> <text_size: small | big>'")
+                print(Fore.RED + "Incorrect usage of 'createPost' command \n 'createPost <amount> <text_size: small | big>' 'r - to create post in redis' '<tg_user_id> to create post with specific tg id'")
                 return False
 
             try:
                 amount = int(tokens[1])
                 text_size = tokens[2]
+                tg_user_id: int | None = None
                 
                 #create post inside redis
                 if len(tokens) > 3 and tokens[3] == 'r':
-                   await createPostRedis(text_size, amount)
+                    if len(tokens) > 4:
+                        tg_user_id = int(tokens[4])
+
+                    await createPostRedis(text_size, amount, tg_user_id)
                 #create post inside database
                 else: 
                     await createPost(text_size, amount)
@@ -163,8 +172,14 @@ async def parse_user_input(tokens: list[str]) -> bool:
             try:
                 if len(tokens) > 1:
                     is_getting_unprocessed = tokens[1]
+                    show_data = False
                     if is_getting_unprocessed == "unproc":
-                        await getRedisPostsUnprocessed() 
+                        if len(tokens) > 2:
+                            show_data = tokens[2]
+                            if show_data == "data":
+                                show_data = True
+
+                        await getRedisPostsUnprocessed(show_data) 
                     else:
                         print(Fore.RED + f"Bad argument '{is_getting_unprocessed}'")
                 else:

@@ -1,25 +1,13 @@
 from aiogram import Router, Bot
 from aiogram.filters import Command
 from aiogram.types import Message
-from keyboards.inline import keyboard_webapp
-from core.config import CHANNEL_ID, WEBSITE_URL_BASE
+from keyboards.inline import keyboard_webapp, keyboard_continue_viewing_posts
+from core.config import CHANNEL_ID, WEBSITE_URL_BASE, ADMINS
 from db.crud import ChanellMessagesCrud
+from core.users import forward_user_posts_from_channel
 
 router = Router()
 
 @router.message(Command("myposts"))
-async def myposts_commands_handler(message: Message, bot: Bot) -> None:
-    user_id = message.chat.id
-
-    posts = await ChanellMessagesCrud.get(str(user_id))
-    if posts == []:
-        await message.answer(text="❌Ти ще не написав жодного посту❌\n\n⬇",reply_markup=keyboard_webapp(text="Написати пост",url=WEBSITE_URL_BASE))
-        return
-
-    await bot.forward_messages(
-        chat_id=message.chat.id,
-        from_chat_id=CHANNEL_ID,
-        message_ids=[i.message_id for i in posts]
-    )
-
-
+async def myposts_command_handler(message: Message, bot: Bot) -> None:
+    await forward_user_posts_from_channel(message, bot, amount=10, start=0)

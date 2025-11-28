@@ -175,14 +175,16 @@ async function submitPost() {
 		const tg = window.Telegram.WebApp;
 		let userId = tg.initDataUnsafe?.user?.id;
 
+        let http_body = {title: title, text: text}
+
 		if (userId !== undefined) {
-			url += `?telegram_user_id=${userId}`;
+            http_body["telegram_user_id"] = userId.toString();
 		}
 		
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, text }),
+      body: JSON.stringify(http_body),
     });
 
     if (res.ok) {

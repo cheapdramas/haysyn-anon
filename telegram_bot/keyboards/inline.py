@@ -10,6 +10,17 @@ def keyboard_mod(post_id: str) -> InlineKeyboardMarkup:
 
     return keyboard
 
+
+def keyboard_continue_viewing_posts(last_post_index: int) -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Завантажити ще", callback_data=f"last_post_index:{last_post_index}")]
+        ]
+    )
+
+    return keyboard
+
+
 def keyboard_link(url: str,text:str="Link") -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
