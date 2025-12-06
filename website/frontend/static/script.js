@@ -112,7 +112,12 @@ async function loadFeedChunk(sort_by="likes") {
 			last_post_index = last_post.getAttribute("index");
 		}
     console.log(last_post_index);
-		const res = await fetch(`/api/api_v1/posts?start=${last_post_index}&amount=${POSTS_PER_PAGE}&sort_by=${sort_by}`);
+		const res = await fetch("/api/api_v1/posts",{
+            method:"POST", 
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({"limit": POSTS_PER_PAGE,"offset":last_post_index, "sort_by":sort_by,})
+        });
+
 		posts = await res.json();
 
 		if (posts.length === 0) {

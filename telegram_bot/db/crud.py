@@ -94,8 +94,7 @@ class ChanellMessagesCrud:
                 if user_id:
                     q = q.filter(ChanellMessages.user_id==user_id)
 
-                if start and amount:
-                    q = q.offset(start).limit(amount)
+                q = q.offset(start).limit(amount)
 
                 result = await session.execute(q)
                 return result.scalars().all()      

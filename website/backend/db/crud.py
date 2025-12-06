@@ -5,7 +5,8 @@ from backend.schemas.post import (
 	PostCreate,
 	PostLikeAction,
 	PostRead,
-    PostSortByOptions
+    PostSortByOptions,
+	PostsQuery
 )
 from backend.schemas.comment import (
 	CommentBase,
@@ -18,7 +19,7 @@ from typing import Sequence
 from sqlalchemy.orm import Session, query
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import func, update, case
+from sqlalchemy import except_, func, update, case
 
 class PostCrud:
     @staticmethod
@@ -63,55 +64,64 @@ class PostCrud:
     @staticmethod
     async def get_posts(
         session: AsyncSession,
-        sort_by: str,
-        amount: int,
-        start: int = 0,
+        post_query: PostsQuery 
     ) -> Sequence[PostRead]:
         query = select(
             Post.id,
             Post.title,
+            Post.in_tg_channel,
             Post.likes,
             Post.dislikes,
             func.substr(Post.text, 1, 200).label("text")
         )
 
+        if post_query.in_tg_channel != None:
+            query = query.where(Post.in_tg_channel==post_query.in_tg_channel)
 
-        if sort_by == "old":
-            query = query.offset(start).limit(amount)
+            
 
-        if sort_by == "new":
-            query = query.order_by(Post.id.desc()).offset(start).limit(amount)
+        if post_query.exclude:
+            query = query.where(Post.id.notin_(post_query.exclude))
 
-        if sort_by == "likes":
+        if post_query.telegram_user_id:
+            query = query.where(Post.telegram_user_id == post_query.telegram_user_id)
+
+        if post_query.sort_by == "old":
+            query = query.order_by(Post.id.asc())
+
+        elif post_query.sort_by == "new":
+            query = query.order_by(Post.id.desc())
+
+        elif post_query.sort_by == "likes":
             order_expr = case(
-                (Post.likes == 0, 0),   
-                else_=1                
+                (Post.likes == 0, 0),
+                else_=1
             ).desc()
 
             query = query.order_by(
                 order_expr,
                 Post.likes.desc(),
                 Post.id.desc()
-            ).offset(start).limit(amount)
+            )
 
-        if sort_by == "dislikes":
+        elif post_query.sort_by == "dislikes":
             order_expr = case(
-                (Post.dislikes== 0, 0),   
-                else_=1                
+                (Post.dislikes == 0, 0),
+                else_=1
             ).desc()
 
             query = query.order_by(
                 order_expr,
                 Post.dislikes.desc(),
                 Post.id.desc()
-            ).offset(start).limit(amount)
+            )
 
-        
+        # 🔥 LIMIT + OFFSET (спільно для всіх)
+        query = query.offset(post_query.offset).limit(post_query.limit)
 
-
+        # 🔥 Виконання
         result = await session.execute(query)
-        posts = result.all()
-        return posts
+        return result.all()
 
     @staticmethod
     async def get_likes(
@@ -171,7 +181,21 @@ class PostCrud:
             await session.execute(q)
             await session.commit()
         except Exception as e:
-            print("Error occured in post dislike method: ",str(e))
+            print("Error occured in post dislike method: ", str(e))
+
+    @staticmethod 
+    async def in_tg_channel(
+        session: AsyncSession,
+        post_id: int,
+        set_to: bool = True,
+    ):
+        try:
+            q = update(Post).where(Post.id==post_id).values(in_tg_channel=set_to)
+            await session.execute(q)
+            await session.commit()
+        except Exception as e:
+            print("Error occured in in_tg_channel method: ", str(e))
+
 
 
 class CommentCrud:

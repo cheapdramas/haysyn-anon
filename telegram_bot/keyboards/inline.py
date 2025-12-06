@@ -11,10 +11,12 @@ def keyboard_mod(post_id: str) -> InlineKeyboardMarkup:
     return keyboard
 
 
-def keyboard_continue_viewing_posts(last_post_index: int) -> InlineKeyboardMarkup:
+def keyboard_continue_viewing_posts(offset: int, get_from_channel:bool) -> InlineKeyboardMarkup:
+    callback_data = f"continue_viewing_posts_{'channel' if get_from_channel else 'website'}:{offset}"
+
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="Завантажити ще", callback_data=f"last_post_index:{last_post_index}")]
+            [InlineKeyboardButton(text="Завантажити ще", callback_data=callback_data)]
         ]
     )
 

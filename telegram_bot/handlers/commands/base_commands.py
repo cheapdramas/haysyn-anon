@@ -8,7 +8,7 @@ from utils.set_commands import set_commands
 router = Router()
 
 @router.message(Command("start"))
-async def myposts_command_handler(message: Message, bot: Bot) -> None:
+async def start_command_handler(message: Message, bot: Bot) -> None:
     user_id = str(message.chat.id)
     await bot.set_chat_menu_button(
         chat_id= int(user_id),

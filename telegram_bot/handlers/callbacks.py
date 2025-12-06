@@ -1,11 +1,11 @@
 from aiogram import Router, Bot 
 from aiogram.types import CallbackQuery
+from core.users import myposts
 from db.crud import ModMessagesCrud, ChanellMessagesCrud
 from core.api_communication import send_approved_post
 from core.Redis.scripts import remove_post as redis_remove_post
 from core.config import CHANNEL_NAME, WEBSITE_URL_BASE
 from keyboards.inline import keyboard_link
-from core.users import forward_user_posts_from_channel  
 
 router = Router()
 
@@ -74,11 +74,20 @@ async def decline_handler(callback: CallbackQuery, bot: Bot):
         print("Decline post error: ", str(e))
 
 
-#handle continue viewing posts button 
-@router.callback_query(lambda c: c.data and c.data.startswith("last_post_index:"))
+# handle continue viewing posts
+@router.callback_query(lambda c: c.data and c.data.startswith("continue_viewing_posts"))
 async def continue_view_posts_button_handler(callback: CallbackQuery, bot: Bot):
-    last_post_index = callback.data.split(":")[1]
-    await forward_user_posts_from_channel(callback.message, bot, start=last_post_index, amount=10, last_post_index=int(last_post_index))
+    callback_parts = callback.data.split(':')
+    offset = int(callback_parts[1])
+    print(offset)
+    view_from = callback_parts[0].split('_')[-1]    
+    print("view_from: ", view_from)
+
+    if view_from == "channel":
+        await myposts(callback.message, bot, offset, user_id=callback.from_user.id, load_from_website=False) 
+    elif view_from == "website":
+        await myposts(callback.message, bot, offset, load_from_website=True) 
+
 
     await callback.message.delete()
     

@@ -58,12 +58,6 @@ async def createPostRedis(text_size: str, amount: int = 1, tg_user_id:str | None
 
 
 
-        
-
-
-
-
-
 async def createPost(text_size: str, amount: int = 1) -> bool:
     "Creates <amount> posts to db with random text"
     #check argument types
@@ -76,8 +70,8 @@ async def createPost(text_size: str, amount: int = 1) -> bool:
         return False
 
     async with db_helper.session_factory() as session:
-        for _ in range(amount):
-            post = PostCreate(title="Title", text=fake.text(max_nb_chars=size_text))
+        for i in range(amount):
+            post = PostCreate(title=f"Title {i}", text=fake.text(max_nb_chars=size_text))
             try: 
 
                 #add post to db

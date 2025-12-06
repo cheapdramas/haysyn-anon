@@ -5,7 +5,7 @@
 from sqlalchemy import (
 	Column, Integer,Text,
     String,DateTime, func,
-    ForeignKey, CheckConstraint
+    ForeignKey, CheckConstraint, Boolean
 )
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase 
@@ -13,7 +13,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 from backend.schemas.post import MAX_TITLE_LEN, MAX_TEXT_LEN
 
-class Base(AsyncAttrs ,DeclarativeBase):
+class Base(AsyncAttrs, DeclarativeBase):
     pass
 
 class Post(Base):
@@ -25,6 +25,7 @@ class Post(Base):
     likes = Column(Integer, default=0)
     dislikes = Column(Integer, default=0)
     telegram_user_id = Column(String(64), nullable=True)
+    in_tg_channel = Column(Boolean, default=False)
 
     __table_args__ = (
         CheckConstraint(likes >= 0, name='check_positive_value'),

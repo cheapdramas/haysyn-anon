@@ -39,6 +39,8 @@ async def remove_post(post_id: str) -> dict:
 
 async def publish_post_in_channel(prefix: str, post_id: int):
     r = await get_redis()
+
+    await r.sadd("unsent_tg_channel_posts", str(post_id))
     await r.publish(REDIS_CHANNEL_NAME, f"{prefix}:{post_id}")
 
 

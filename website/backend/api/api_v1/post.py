@@ -21,7 +21,8 @@ from backend.schemas.post import (
 	PostCreate,
 	PostLikeAction,
 	PostRead,
-    PostSortByOptions
+    PostSortByOptions,
+	PostsQuery
 )
 from backend.db.utils import db_helper
 from backend.core.auth import id_generator, verify_token_depends
@@ -69,42 +70,22 @@ async def get_post(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
     return post
 
-@router.get("/posts",response_model=List[PostRead])
+@router.post("/posts",response_model=List[PostRead])
 @fall_free()
-async def get_posts(
+async def get_posts_handler(
     session: Annotated[
         AsyncSession,
         Depends(db_helper.session_getter)
     ],
-    start: Annotated[int,Field(gt=-1)],
-    amount: Annotated[int,Field(gt=0, lt=101)],
-    sort_by: PostSortByOptions,
+    post_query: PostsQuery
 ):
-    """Returns <amount> of posts, starting from <start>"""
-    posts = await PostCrud.get_posts(
-        start=start,
-        amount=amount,
-        session=session,
-        sort_by=sort_by.value,
-    )
+    """Returns <limit> of posts, starting from <offset>"""
+    print(post_query.offset)
+
+    posts = await PostCrud.get_posts(session, post_query)
 
     return posts
 
-@router.get("/posts_by_tg_user_id",response_model=List[PostRead])
-@fall_free()
-async def get_posts(
-    session: Annotated[
-        AsyncSession,
-        Depends(db_helper.session_getter)
-    ],
-    telegram_user_id: str
-):
-    posts = await PostCrud.get_posts_tg_user_id(
-        telegram_user_id,
-        session,
-    )
-
-    return posts
 
 @router.post("/submit_post")
 @fall_free()
@@ -146,3 +127,18 @@ async def dislike_post(
 ):
     await PostCrud.dislike(session,post_id=post_id,action=action)
     return await PostCrud.get_dislikes(session,post_id=post_id)
+
+
+@router.patch("/post_in_tg_channel")
+async def in_tg_channel_handler(
+     session: Annotated[
+        AsyncSession,
+        Depends(db_helper.session_getter)
+    ],
+    post_id: int,
+    set_to: bool,
+    token: str = Depends(verify_token_depends("bot"))
+):
+    await PostCrud.in_tg_channel(session, post_id, set_to)
+     
+

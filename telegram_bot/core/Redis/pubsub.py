@@ -6,7 +6,7 @@ from core.config import CHANNEL_ID, REDIS_CHANNEL_NAME, ADMINS, WEBSITE_URL_BASE
 from core.messages import mod_message
 from keyboards.inline import keyboard_link, keyboard_mod
 from db.crud import ChanellMessagesCrud, ModMessagesCrud
-from core.api_communication import get_post as api_get_post
+from core.api_communication import get_post as api_get_post, set_post_in_tg_channel
 
 
 # code that works in the background and sends post to admin in telegram
@@ -54,8 +54,6 @@ async def listen_to_redis(bot):
                         try:
                             print("POST_ID:", post_id)
 
-
-
                             # make a request to api to get post data
                             post_data = await api_get_post(post_id)
                             if not post_data:
@@ -65,8 +63,10 @@ async def listen_to_redis(bot):
                             keyboard = keyboard_link(text="Посилання на пост",url=f"{WEBSITE_URL_BASE}post/{post_id}")
                             await send_message_to_channel(post_id ,post_data.get("telegram_user_id"), bot, msg, keyboard)
 
-                        except Exception as e:
+                            await set_post_in_tg_channel(post_id, True)
 
+
+                        except Exception as e:
                             print(f"Failed to send post to telegram channel (listen_to_redis): ", str(e))
 
     except Exception as e:
