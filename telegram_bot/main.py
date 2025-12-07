@@ -1,5 +1,6 @@
 import asyncio
 import core.admins as admins 
+import core.channel as channel
 
 from aiogram import Bot, Dispatcher
 from core.Redis.pubsub import listen_to_redis
@@ -19,6 +20,7 @@ async def main() -> None:
 
 
     await admins.send_unprocessed_posts(bot)
+    await channel.send_unsent_tg_posts_to_channel(bot)
    
     #create a task that will listen to redis channel 
     #and send new posts to admins
@@ -26,6 +28,7 @@ async def main() -> None:
 
     dp = Dispatcher()
     dp.include_router(router)
+    dp.startup.register(set_commands)
     await dp.start_polling(bot)
 
 

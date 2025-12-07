@@ -3,9 +3,10 @@ from aiogram.types import CallbackQuery
 from core.users import myposts
 from db.crud import ModMessagesCrud, ChanellMessagesCrud
 from core.api_communication import send_approved_post
-from core.Redis.scripts import remove_post as redis_remove_post
+from core.Redis.scripts import RawPost
 from core.config import CHANNEL_NAME, WEBSITE_URL_BASE
 from keyboards.inline import keyboard_link
+import asyncio
 
 router = Router()
 
@@ -27,27 +28,6 @@ async def approve_handler(callback: CallbackQuery, bot: Bot):
 
         await callback.answer(f"Approved ✅")
 
-        # send post to telegram channel
-        # post_url = f"{WEBSITE_URL_BASE}post/{api_answer['id']}"
-        # channel_message = await bot.send_message(
-        #     chat_id=CHANNEL_NAME,
-        #     text=callback.message.text, 
-        #     entities=callback.message.entities,
-        #     reply_markup=keyboard_link(text="Посилання на пост", url=post_url)
-        # )
-        #
-        # # if telegram_user_id is in api_answer
-        # if telegram_user_id := api_answer.get("telegram_user_id"):
-        #     # add message to channel messages table
-        #     await ChanellMessagesCrud.add(
-        #         user_id=telegram_user_id,
-        #         message_id=str(channel_message.message_id)
-        #     )
-        #
-
-
-
-
         print(f"Approved post: {post_id}")
     else:
         await callback.answer(f"Connection with API failed 😔")
@@ -63,7 +43,7 @@ async def decline_handler(callback: CallbackQuery, bot: Bot):
             await bot.delete_message(chat_id=msg.admin_id, message_id=msg.message_id)
         await ModMessagesCrud.delete(post_id)
         
-        await redis_remove_post("post:" + post_id)
+        await RawPost.remove("post:" + post_id)
 
 
         await callback.answer(f"Declined ❌")
@@ -84,7 +64,7 @@ async def continue_view_posts_button_handler(callback: CallbackQuery, bot: Bot):
     print("view_from: ", view_from)
 
     if view_from == "channel":
-        await myposts(callback.message, bot, offset, user_id=callback.from_user.id, load_from_website=False) 
+        asyncio.create_task(myposts(callback.message, bot, offset, user_id=callback.from_user.id, load_from_website=False))
     elif view_from == "website":
         await myposts(callback.message, bot, offset, load_from_website=True) 
 

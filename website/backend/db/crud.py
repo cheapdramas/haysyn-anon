@@ -74,7 +74,7 @@ class PostCrud:
             Post.dislikes,
             func.substr(Post.text, 1, 200).label("text")
         )
-
+        sort_by = post_query.sort_by.value
         if post_query.in_tg_channel != None:
             query = query.where(Post.in_tg_channel==post_query.in_tg_channel)
 
@@ -86,13 +86,13 @@ class PostCrud:
         if post_query.telegram_user_id:
             query = query.where(Post.telegram_user_id == post_query.telegram_user_id)
 
-        if post_query.sort_by == "old":
+        if sort_by == "old":
             query = query.order_by(Post.id.asc())
 
-        elif post_query.sort_by == "new":
+        elif sort_by == "new":
             query = query.order_by(Post.id.desc())
 
-        elif post_query.sort_by == "likes":
+        elif sort_by == "likes":
             order_expr = case(
                 (Post.likes == 0, 0),
                 else_=1
@@ -104,7 +104,7 @@ class PostCrud:
                 Post.id.desc()
             )
 
-        elif post_query.sort_by == "dislikes":
+        elif sort_by == "dislikes":
             order_expr = case(
                 (Post.dislikes == 0, 0),
                 else_=1

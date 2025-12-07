@@ -80,8 +80,6 @@ async def get_posts_handler(
     post_query: PostsQuery
 ):
     """Returns <limit> of posts, starting from <offset>"""
-    print(post_query.offset)
-
     posts = await PostCrud.get_posts(session, post_query)
 
     return posts

@@ -1,11 +1,12 @@
 from aiogram import Bot
 from aiogram.types import Message
-from core.api_communication import get_posts
+from core.api_communication import api_get_posts
 from keyboards.inline import keyboard_link, keyboard_webapp, keyboard_continue_viewing_posts
 from core.config import CHANNEL_ID, WEBSITE_URL_BASE, MAX_POSTS_AMOUNT_TO_USER
 from db.crud import ChanellMessagesCrud
 from core.auth import  anonymize_user_id
-from core.messages import mod_message
+from core.messages import message_post_format
+import asyncio
 
 
 async def send_posts_from_website(
@@ -22,7 +23,7 @@ async def send_posts_from_website(
     """
 
     anon_user_id = anonymize_user_id(str(message.chat.id))
-    website_posts = await get_posts(
+    website_posts = await api_get_posts(
         anon_user_id,
         offset=offset,
         limit=limit,
@@ -31,7 +32,7 @@ async def send_posts_from_website(
     )
 
     for post in website_posts:
-        msg = mod_message(post)
+        msg = message_post_format(post)
         await message.answer(text=msg, parse_mode="HTML", reply_markup=keyboard_link(text="Посилання на пост",url=f"{WEBSITE_URL_BASE}post/{post['id']}"))
 
     return len(website_posts)
@@ -68,17 +69,13 @@ async def send_posts_from_channel(
         if channel_posts == []:
             break
 
+        tasks = []
         for post in channel_posts:
             try:
-                await bot.forward_message(
-                    chat_id=userId,
-                    from_chat_id=CHANNEL_ID,
-                    message_id=post.message_id
-                )
-                sent_posts += 1 
-
-            except Exception as e:
-                print(f"Message {post.message_id} forward failed for user: {message.from_user.id}", str(e))
+                await bot.forward_message(chat_id=userId, from_chat_id=CHANNEL_ID, message_id=post.message_id)
+                sent_posts += 1
+            except:
+                print(f"Message {post.message_id} forward from channel failed for user {anon_user_id}")
 
         offset = offset + len(channel_posts) 
 
@@ -101,6 +98,7 @@ async def myposts(message: Message, bot: Bot, offset: int, limit: int = MAX_POST
     print(sent_posts_channel)
 
     if sent_posts_channel < limit:
+        print("LESS THAN LIMIT")
         sent_posts_website = await send_posts_from_website(message, 0, limit - sent_posts_channel, [], in_tg_channel=False) 
 
         if sent_posts_channel + sent_posts_website == limit:

@@ -20,7 +20,7 @@ async def send_approved_post(post_id: str) -> None | dict:
     except Exception:
         return None 
 
-async def get_post(post_id: str) -> None | dict:
+async def api_get_post(post_id: str) -> None | dict:
     url = f"{WEBSITE_URL_BASE}{API_VERSION}post?id={post_id}"
     try:
         async with aiohttp.ClientSession() as session:
@@ -31,7 +31,7 @@ async def get_post(post_id: str) -> None | dict:
     except Exception:
         return None 
 
-async def get_posts(
+async def api_get_posts(
     telegram_user_id: str,
     offset: int, 
     limit: int, 
@@ -42,6 +42,7 @@ async def get_posts(
     try:
         async with aiohttp.ClientSession() as session:
             resp = await session.post(url, json={"telegram_user_id":telegram_user_id, "offset": offset, "limit": limit, "exclude": exclude, "sort_by":"old", "in_tg_channel":in_tg_channel})
+            print("MAKING REQUEST")
             if resp.status == 200:
                 return await resp.json()
         return []
@@ -49,7 +50,7 @@ async def get_posts(
         return []
 
 
-async def set_post_in_tg_channel(
+async def api_set_post_in_tg_channel(
     post_id: int | str,
     set_to: bool
 ) -> bool:
