@@ -8,11 +8,11 @@ Long story short, for some reason i kinda created a (really poor) Reddit clone, 
 
 
 
-[website-desktop](readme-illustrations/website-interface.png)
+![website-desktop](readme-illustrations/website-interface.png)
 Website look on desktop (frontend is 'fully' vibe-coded btw), same shi you will have on your phone
 
 ## Telegram bot
-[tg-bot-look](readme-illustrations/bot-interface.jpg)
+![tg-bot-look](readme-illustrations/bot-interface.jpg)
 Telegram bot interface
 
  - You can enter main website through MiniApp. Everything YOU posted from MiniApp goes into db with your telegram id hashed (i believe), all this to (next point)
@@ -21,11 +21,11 @@ Telegram bot interface
  - **ADMINS** use bot as the main post moderation source
 
 **ADMINS** part of telegram bot:
-[post-moderation](readme-illustrations/post-moderation.jpg)
+![post-moderation](readme-illustrations/post-moderation.jpg)
 
  - Approve -> post uploads to website
  - Decline -> post deleted (redis)
  
- [post-moderation-gif](./readme-illustrations/post-moderation.gif)
+ ![post-moderation-gif](./readme-illustrations/post-moderation.gif)
 There are several admins, if one of them approves/declines post -> post moderation message disappear  from chats for EVERY admin
 ## ...This README WIP...
