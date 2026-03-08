@@ -8,7 +8,7 @@ Long story short, for some reason i kinda created a (really poor) Reddit clone, 
 
 
 
-[website-desktop](readme-illustrations/website-interface.jpg)
+[website-desktop](readme-illustrations/website-interface.png)
 Website look on desktop (frontend is 'fully' vibe-coded btw), same shi you will have on your phone
 
 ## Telegram bot
@@ -26,6 +26,6 @@ Telegram bot interface
  - Approve -> post uploads to website
  - Decline -> post deleted (redis)
  
- [post-moderation-gif](readme-illustrations/post-moderation.gif)
+ [post-moderation-gif](./readme-illustrations/post-moderation.gif)
 There are several admins, if one of them approves/declines post -> post moderation message disappear  from chats for EVERY admin
 ## ...This README WIP...
