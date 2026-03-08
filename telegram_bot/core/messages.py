@@ -25,9 +25,12 @@ RULES = """
 Зворотній зв'язок: haysynanon@gmail.com
 """
 
+SENT_SUCCESS = "Повідомлення успішно відправилось 🚓"
+
+SENT_FAILURE = "Не вдалось відправити повідмолення 🥲"
 
 
-def message_post_format(post_data: dict) -> str: 
+def message_post_format(post_data: dict) -> str:
     """Message in HTML FORMAT"""
     msg = (
         f"<b>{post_data['title']}</b>\n"
@@ -35,9 +38,18 @@ def message_post_format(post_data: dict) -> str:
     )
     return msg
 
+
 def message_anon(text: str):
     msg = (
         f"<b>Тобі прийшло анонімне повідомлення!</b> 💌\n"
         f"<i>{text}</i>\n\n"
-    ) 
+    )
+    return msg
+
+
+def message_answer(text: str, receiver_username: str):
+    msg = (
+        f"<b>Тобі прийшла відповідь від @{receiver_username}!</b> 💌\n"
+        f"<i>{text}</i>\n\n"
+    )
     return msg

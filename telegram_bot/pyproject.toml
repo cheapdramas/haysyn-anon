@@ -13,7 +13,11 @@ pyjwt = "^2.10.1"
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.44"}
 aiosqlite = "^0.21.0"
 redis = "^6.4.0"
+pydub = "^0.25.1"
 
+
+[tool.poetry.group.dev.dependencies]
+python-lsp-server = {extras = ["all"], version = "^1.14.0"}
 
 [build-system]
 requires = ["poetry-core"]

@@ -3,12 +3,12 @@ from sqlalchemy import (
     String
 )
 from sqlalchemy.ext.asyncio import AsyncAttrs
-from sqlalchemy.orm import DeclarativeBase 
+from sqlalchemy.orm import DeclarativeBase
 
 class Base(AsyncAttrs ,DeclarativeBase):
     pass
 
-class ModMessages(Base):
+class ModMessage(Base):
     __tablename__ = "messages_wait_mod"
     post_id = Column(String,primary_key=True)
     admin_id = Column(String, primary_key=True)

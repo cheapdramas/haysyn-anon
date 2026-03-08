@@ -25,3 +25,4 @@ WEBSITE_URL_BASE = get_from_env("WEBSITE_URL_BASE")
 API_VERSION = get_from_env("API_VERSION")
 SECRET_SALT = get_from_env("SECRET_SALT")
 MAX_POSTS_AMOUNT_TO_USER = 5
+VOICE_MESSAGES_PATH = Path(__file__).parent.parent / "tmp" / "voice"

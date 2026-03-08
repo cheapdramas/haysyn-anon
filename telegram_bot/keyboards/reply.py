@@ -6,17 +6,16 @@ buttons = {
     "myposts": "📁 Мої пости",
     "anonmessage": "📨 Анонімно написати другу",
     "rules": "📜 Правила",
-    "help": "🚑 Допомога"
+    "help": "🚑 Допомога",
+    "cancel": "❌ Скасувати"
 }
 
 def keyboard_reply_menu() -> ReplyKeyboardMarkup:
     keyboard = ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text=buttons["web"])],
+            [KeyboardButton(text=buttons["web"]), KeyboardButton(text=buttons["anonmessage"])],
             [KeyboardButton(text=buttons["myposts"])],
-            [KeyboardButton(text=buttons["anonmessage"])],
-            [KeyboardButton(text=buttons["rules"])],
-            [KeyboardButton(text=buttons["help"])]
+            [KeyboardButton(text=buttons["help"]), KeyboardButton(text=buttons["rules"])]
         ],
         # resize_keyboard=True,
         one_time_keyboard=False,
@@ -29,10 +28,11 @@ def keyboard_reply_request_chat() -> ReplyKeyboardMarkup:
     keyboard = ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="Виберіть контакт", request_user=request_chat_button)],
+            [KeyboardButton(text=buttons["cancel"])],
         ],
         # resize_keyboard=True,
         one_time_keyboard=True,
-        # input_field_placeholder="Оберіть дію…"
+        input_field_placeholder="Обери контакт"
     )
     return keyboard 
 

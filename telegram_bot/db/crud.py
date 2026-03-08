@@ -1,7 +1,8 @@
 from sqlalchemy.future import select
 from .utils import db_helper
-from .models import ModMessages, ChanellMessages
+from .models import ModMessage, ChanellMessages
 from typing import Sequence
+
 
 class ModMessagesCrud:
     @staticmethod
@@ -9,40 +10,41 @@ class ModMessagesCrud:
         message_id: int,
         admin_id: int,
         post_id: str
-    ) -> ModMessages:
+    ) -> ModMessage:
         try:
             async with db_helper.session_factory() as session:
-                message_info = ModMessages(
-                    message_id = message_id,
-                    admin_id = admin_id,
-                    post_id = post_id
+                message_info = ModMessage(
+                    message_id=message_id,
+                    admin_id=admin_id,
+                    post_id=post_id
                 )
                 session.add(message_info)
                 await session.commit()
                 await session.refresh(message_info)
                 return message_info
         except Exception as e:
-            print("Error occured! ModMessagesCrud.add : ",str(e))
+            print("Error occured! ModMessagesCrud.add : ", str(e))
 
     @staticmethod
-    async def get(post_id: str) -> Sequence[ModMessages]:
+    async def get(post_id: str) -> Sequence[ModMessage]:
         try:
             async with db_helper.session_factory() as session:
-                q = select(ModMessages).filter(ModMessages.post_id == post_id)
+                q = select(ModMessage).filter(ModMessage.post_id == post_id)
 
                 result = await session.execute(q)
                 return result.scalars().all()
         except Exception as e:
-            print(f"Error occured! ModMessagesCrud.get with post_id: {post_id}: ",str(e))
+            print(f"Error occured! ModMessagesCrud.get with post_id: {
+                  post_id}: ", str(e))
 
     @staticmethod
-    async def delete(post_id:str) -> bool:
+    async def delete(post_id: str) -> bool:
         try:
             async with db_helper.session_factory() as session:
                 q = (
-                    select(ModMessages)
+                    select(ModMessage)
                     .filter(
-                        ModMessages.post_id == post_id
+                        ModMessage.post_id == post_id
                     )
                 )
                 posts = await session.execute(q)
@@ -52,7 +54,8 @@ class ModMessagesCrud:
                 await session.commit()
                 return True
         except Exception as e:
-            print(f"Error occured! ModMessagesCrud.delete with post_id: {post_id}: ",str(e))
+            print(f"Error occured! ModMessagesCrud.delete with post_id: {
+                  post_id}: ", str(e))
             return False
 
 
@@ -75,33 +78,27 @@ class ChanellMessagesCrud:
                 await session.refresh(message_info)
                 return message_info
         except Exception as e:
-            print("Error occured! ChanellMessages.add : ",str(e))
+            print("Error occured! ChanellMessages.add : ", str(e))
 
     @staticmethod
     async def get(
         user_id: str | None = None,
         post_id: str | None = None,
         start: int | None = 0,
-        amount: int | None = 10 
+        amount: int | None = 10
     ) -> Sequence[ChanellMessages]:
         try:
             async with db_helper.session_factory() as session:
-                
-                
+
                 q = select(ChanellMessages)
                 if post_id:
-                    q = q.filter(ChanellMessages.post_id==post_id)
+                    q = q.filter(ChanellMessages.post_id == post_id)
                 if user_id:
-                    q = q.filter(ChanellMessages.user_id==user_id)
+                    q = q.filter(ChanellMessages.user_id == user_id)
 
                 q = q.offset(start).limit(amount)
 
                 result = await session.execute(q)
-                return result.scalars().all()      
+                return result.scalars().all()
         except Exception as e:
-            print("Error occured! ChanellMessages.add : ",str(e))
-
-
-
-
-
+            print("Error occured! ChanellMessages.add : ", str(e))
